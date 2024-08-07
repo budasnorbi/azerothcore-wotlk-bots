@@ -11829,6 +11829,12 @@ void Player::LearnDefaultSkills()
     for (PlayerCreateInfoSkills::const_iterator itr = info->skills.begin(); itr != info->skills.end(); ++itr)
     {
         uint32 skillId = itr->SkillId;
+
+        if (skillId == 573 || skillId == 574)
+        {
+            continue;
+        }
+
         if (HasSkill(skillId))
             continue;
 

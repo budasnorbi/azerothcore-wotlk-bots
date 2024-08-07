@@ -40,16 +40,12 @@ bool AuctionListItemsDelayEvent::Execute()
     if (!plr || !plr->IsInWorld() || plr->IsDuringRemoveFromWorld() || plr->IsBeingTeleported())
         return true;
 
-    Creature* creature = plr->GetNPCIfCanInteractWith(_creatureguid, UNIT_NPC_FLAG_AUCTIONEER);
-    if (!creature)
-        return true;
-
-    AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(creature->GetFaction());
+    AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(plr->GetFaction());
 
     WorldPacket data(SMSG_AUCTION_LIST_RESULT, (4 + 4 + 4) + 50 * ((16 + MAX_INSPECTED_ENCHANTMENT_SLOT * 3) * 4));
     uint32 count = 0;
     uint32 totalcount = 0;
-    data << (uint32) 0;
+    data << (uint32)0;
 
     // converting string that we try to find to lower case
     std::wstring wsearchedname;
@@ -60,15 +56,15 @@ bool AuctionListItemsDelayEvent::Execute()
 
     uint32 searchTimeout = sWorld->getIntConfig(CONFIG_AUCTION_HOUSE_SEARCH_TIMEOUT);
     bool result = auctionHouse->BuildListAuctionItems(data, plr,
-                  wsearchedname, _listfrom, _levelmin, _levelmax, _usable,
-                  _auctionSlotID, _auctionMainCategory, _auctionSubCategory, _quality,
-                  count, totalcount, _getAll, _sortOrder, Milliseconds(searchTimeout));
+        wsearchedname, _listfrom, _levelmin, _levelmax, _usable,
+        _auctionSlotID, _auctionMainCategory, _auctionSubCategory, _quality,
+        count, totalcount, _getAll, _sortOrder, Milliseconds(searchTimeout));
 
     if (result)
     {
         data.put<uint32>(0, count);
-        data << (uint32) totalcount;
-        data << (uint32) 300; // clientside search cooldown [ms] (gray search button)
+        data << (uint32)totalcount;
+        data << (uint32)300; // clientside search cooldown [ms] (gray search button)
         plr->GetSession()->SendPacket(&data);
     }
 
