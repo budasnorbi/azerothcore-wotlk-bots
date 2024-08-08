@@ -23,12 +23,19 @@ std::vector<uint32> professions = {
     129, // First Aid
 };
 
+std::vector<std::pair<std::string, uint32>> skills = {
+{"POISONS", 40}, {"SWORDS", 43}, {"AXES", 44}, {"BOWS", 45}, {"GUNS", 46}, {"MACES", 54}, {"2H_SWORDS", 55}, {"DEFENSE", 95}, {"DUAL_WIELD", 118},  {"STAVES", 136}, {"2H_MACES", 160}, {"2H_AXES", 172}, {"DAGGERS", 173}, {"THROWN", 176}, {"CROSSBOWS", 226}, {"SPEARS", 227}, {"WANDS", 228}, {"POLEARMS", 229}, {"PLATE_MAIL", 293}, {"LEATHER", 414}, {"CLOTH", 415}, {"MAIL", 413}, {"SHIELD", 433}, {"FIST_WEAPONS", 473}, {"LOCKPICKING", 633},
+};
+
 class LearnSpellsOnLevelUp : public PlayerScript
 {
 public:
     LearnSpellsOnLevelUp() : PlayerScript("LearnSpellsOnLevelUp") {}
 
     void OnFirstLogin(Player *player) override{
+        for (std::pair<std::string, uint32> skillLine : skills) {
+            player->SetSkill(skillLine.second, 5, 1, 5);
+        }
 
         for (uint32 skillId : professions)
         {
