@@ -929,7 +929,7 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
     }
 
     // Rage from Damage made (only from direct weapon damage)
-    if (attacker && cleanDamage && damagetype == DIRECT_DAMAGE && attacker != victim && attacker->HasActivePowerType(POWER_RAGE))
+    if (attacker && cleanDamage && damagetype == DIRECT_DAMAGE && attacker != victim /* && attacker->getPowerType() == POWER_RAGE*/)
     {
         uint32 weaponSpeedHitFactor;
 
@@ -957,10 +957,10 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         // Rage from absorbed damage
         if (cleanDamage && cleanDamage->absorbed_damage)
         {
-            if (victim->HasActivePowerType(POWER_RAGE))
+            //if (victim->HasActivePowerType(POWER_RAGE))
                 victim->RewardRage(cleanDamage->absorbed_damage, 0, false);
 
-            if (attacker && attacker->HasActivePowerType(POWER_RAGE))
+            //if (attacker && attacker->HasActivePowerType(POWER_RAGE))
                 attacker->RewardRage(cleanDamage->absorbed_damage, 0, true);
         }
 
@@ -1083,7 +1083,7 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         }
 
         // Rage from damage received
-        if (attacker != victim && victim->HasActivePowerType(POWER_RAGE))
+        if (attacker != victim /* && victim->getPowerType() == POWER_RAGE */)
         {
             uint32 rageDamage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
             victim->RewardRage(rageDamage, 0, false);
