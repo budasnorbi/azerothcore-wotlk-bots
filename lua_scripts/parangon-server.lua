@@ -99,7 +99,7 @@ function parangon.onServerStart(event)
     io.write('Eluna :: Parangon System start \n')
 end
 
-
+RegisterServerEvent(14, parangon.onServerStart)
 
 function parangon_addon.setStats(player)
     local pLevel = player:GetLevel()
@@ -166,7 +166,6 @@ end
 
 function parangon.onLogin(event, player)
     local pAcc = player:GetAccountId()
-
     local getParangonCharInfo = CharDBQuery(
         'SELECT strength, agility, stamina, intellect FROM `' ..
         parangon.config.charDbName ..
@@ -217,7 +216,7 @@ function parangon.onLogin(event, player)
         player:GetData('parangon_points'))
 end
 
-
+RegisterPlayerEvent(3, parangon.onLogin)
 
 function parangon.getPlayers(event)
     for _, player in pairs(GetPlayersInWorld()) do
@@ -226,7 +225,7 @@ function parangon.getPlayers(event)
     io.write('Eluna :: Parangon System start \n')
 end
 
-
+RegisterServerEvent(33, parangon.getPlayers)
 
 function parangon.onLogout(event, player)
     savePlayerPoints(player)
@@ -248,6 +247,7 @@ function parangon.onLogout(event, player)
         pAcc .. ', ' .. level .. ', ' .. exp .. ')')
 end
 
+RegisterPlayerEvent(4, parangon.onLogout)
 
 function parangon.setPlayers(event)
     for _, player in pairs(GetPlayersInWorld()) do
@@ -255,12 +255,19 @@ function parangon.setPlayers(event)
     end
 end
 
-
+RegisterServerEvent(16, parangon.setPlayers)
 
 function parangon.setExp(player, victim)
+    local pAcc = player:GetAccountId()
+
+    if not parangon.account[pAcc] then
+        return
+    end
+
     local pLevel = player:GetLevel()
     local vLevel = victim:GetLevel()
-    local pAcc = player:GetAccountId()
+
+
     local levelDiff = math.abs(vLevel - pLevel)
 
     if (levelDiff <= parangon.config.levelDiff) and (levelDiff >= 0) then
@@ -300,9 +307,15 @@ function parangon.onKillCreatureOrPlayer(event, player, victim)
     end
 end
 
+RegisterPlayerEvent(6, parangon.onKillCreatureOrPlayer)
+RegisterPlayerEvent(7, parangon.onKillCreatureOrPlayer)
 
 function Player:SetParangonLevel(level)
     local pAcc = self:GetAccountId()
+
+    if not parangon.account[pAcc] then
+        return
+    end
 
     parangon.account[pAcc].level = parangon.account[pAcc].level + level
     parangon.account[pAcc].exp = 0
@@ -337,13 +350,3 @@ function savePlayerPoints(player)
         strength ..
         ', ' .. agility .. ', ' .. stamina .. ', ' .. intellect .. ')')
 end
-
-RegisterPlayerEvent(3, parangon.onLogin)
-RegisterPlayerEvent(4, parangon.onLogout)
-
-RegisterPlayerEvent(6, parangon.onKillCreatureOrPlayer)
-RegisterPlayerEvent(7, parangon.onKillCreatureOrPlayer)
-
-RegisterServerEvent(14, parangon.onServerStart)
-RegisterServerEvent(16, parangon.setPlayers)
-RegisterServerEvent(33, parangon.getPlayers)
