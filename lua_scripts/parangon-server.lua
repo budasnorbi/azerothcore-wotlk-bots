@@ -33,7 +33,7 @@ local parangon = {
         expMulti = 1,
         expMax = 500,
 
-        pveKill = 150,
+        pveKill = 100,
         pvpKill = 10,
 
         levelDiff = 3,
