@@ -166,10 +166,13 @@ end
 
 function parangon.onLogin(event, player)
     local pAcc = player:GetAccountId()
+    local pGuid = player:GetGUIDLow()
+
     local getParangonCharInfo = CharDBQuery(
         'SELECT strength, agility, stamina, intellect FROM `' ..
         parangon.config.charDbName ..
-        '`.`characters_parangon` WHERE account_id = ' .. pAcc)
+        '`.`characters_parangon` WHERE account_id = ' .. pAcc .. ' AND guid =' .. pGuid)
+
     if getParangonCharInfo then
         player:setParangonInfo(getParangonCharInfo:GetUInt32(0),
             getParangonCharInfo:GetUInt32(1),
@@ -179,12 +182,13 @@ function parangon.onLogin(event, player)
             getParangonCharInfo:GetUInt32(2) +
             getParangonCharInfo:GetUInt32(3))
     else
-        local pGuid = player:GetGUIDLow()
+
         CharDBExecute('INSERT INTO `' ..
             parangon.config.charDbName ..
             '`.`characters_parangon` VALUES (' ..
             pAcc .. ', ' .. pGuid .. ', 0, 0, 0, 0)')
         player:setParangonInfo(0, 0, 0, 0)
+        player:SetData('parangon_points', 0)
     end
     player:SetData('parangon_points_spend', 0)
 
