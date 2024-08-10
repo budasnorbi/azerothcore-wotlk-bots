@@ -344,7 +344,7 @@ function savePlayerPoints(player)
         player:GetData('parangon_stats_7471'),
         player:GetData('parangon_stats_7477'),
         player:GetData('parangon_stats_7468')
-    CharDBExecute('REPLACE INTO `' ..
+    CharDBQuery('REPLACE INTO `' ..
         parangon.config.charDbName ..
         '`.`characters_parangon` VALUES (' ..
         pAcc ..
@@ -353,4 +353,6 @@ function savePlayerPoints(player)
         ', ' ..
         strength ..
         ', ' .. agility .. ', ' .. stamina .. ', ' .. intellect .. ')')
+
+    parangon_addon.setStats(player)
 end
