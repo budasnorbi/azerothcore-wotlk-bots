@@ -150,6 +150,7 @@ parangon.spellsList = {
     [7471] = { name = 'Agility', icon = '_D3mantraofevasion' },
     [7477] = { name = 'Stamina', icon = '_D3mantraofretribution' },
     [7468] = { name = 'Intellect', icon = '_D3mantraofhealing' },
+    [7474] = { name = 'Spirit', icon = '_D3mantraofhealing' },
 }
 
 for id, subtable in pairs(parangon.spellsList) do

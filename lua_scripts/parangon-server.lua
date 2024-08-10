@@ -44,6 +44,7 @@ local parangon = {
         [7471] = 'Agility',
         [7477] = 'Stamina',
         [7468] = 'Intellect',
+        [7474] = 'Spirit',
     },
 }
 
@@ -95,7 +96,7 @@ function parangon.onServerStart(event)
         '`.`account_parangon` (`account_id` INT(11) NOT NULL, `level` INT(11) DEFAULT 1, `exp` INT(11) DEFAULT 0, PRIMARY KEY (`account_id`) );');
     CharDBExecute('CREATE TABLE IF NOT EXISTS `' ..
         parangon.config.charDbName ..
-        '`.`characters_parangon` (`account_id` INT(11) NOT NULL, `guid` INT(11) NOT NULL, `strength` INT(11) DEFAULT 0, `agility` INT(11) DEFAULT 0, `stamina` INT(11) DEFAULT 0, `intellect` INT(11) DEFAULT 0, PRIMARY KEY (`account_id`, `guid`));');
+        '`.`characters_parangon` (`account_id` INT(11) NOT NULL, `guid` INT(11) NOT NULL, `strength` INT(11) DEFAULT 0, `agility` INT(11) DEFAULT 0, `stamina` INT(11) DEFAULT 0, `intellect` INT(11) DEFAULT 0, `spirit` INT(11) DEFAULT 0, PRIMARY KEY (`account_id`, `guid`));');
     io.write('Eluna :: Parangon System start \n')
 end
 
@@ -157,11 +158,12 @@ function parangon_addon.setStatsInformation(player, stat, value, flags)
     end
 end
 
-function Player:setParangonInfo(strength, agility, stamina, intellect)
+function Player:setParangonInfo(strength, agility, stamina, intellect, spirit)
     self:SetData('parangon_stats_7464', strength)
     self:SetData('parangon_stats_7471', agility)
     self:SetData('parangon_stats_7477', stamina)
     self:SetData('parangon_stats_7468', intellect)
+    self:SetData('parangon_stats_7474', spirit)
 end
 
 function parangon.onLogin(event, player)
@@ -176,18 +178,18 @@ function parangon.onLogin(event, player)
     if getParangonCharInfo then
         player:setParangonInfo(getParangonCharInfo:GetUInt32(0),
             getParangonCharInfo:GetUInt32(1),
-            getParangonCharInfo:GetUInt32(2), getParangonCharInfo:GetUInt32(3))
+            getParangonCharInfo:GetUInt32(2), getParangonCharInfo:GetUInt32(3), getParangonCharInfo:GetUInt32(4))
         player:SetData('parangon_points',
             getParangonCharInfo:GetUInt32(0) + getParangonCharInfo:GetUInt32(1) +
             getParangonCharInfo:GetUInt32(2) +
-            getParangonCharInfo:GetUInt32(3))
+            getParangonCharInfo:GetUInt32(3) + getParangonCharInfo:GetUInt32(4))
     else
 
         CharDBExecute('INSERT INTO `' ..
             parangon.config.charDbName ..
             '`.`characters_parangon` VALUES (' ..
-            pAcc .. ', ' .. pGuid .. ', 0, 0, 0, 0)')
-        player:setParangonInfo(0, 0, 0, 0)
+            pAcc .. ', ' .. pGuid .. ', 0, 0, 0, 0, 0)')
+        player:setParangonInfo(0, 0, 0, 0, 0)
         player:SetData('parangon_points', 0)
     end
     player:SetData('parangon_points_spend', 0)
@@ -339,11 +341,12 @@ end
 function savePlayerPoints(player)
     local pAcc = player:GetAccountId()
     local pGuid = player:GetGUIDLow()
-    local strength, agility, stamina, intellect =
+    local strength, agility, stamina, intellect, spirit =
         player:GetData('parangon_stats_7464'),
         player:GetData('parangon_stats_7471'),
         player:GetData('parangon_stats_7477'),
-        player:GetData('parangon_stats_7468')
+        player:GetData('parangon_stats_7468'),
+        player:GetData('parangon_stats_7474')
     CharDBQuery('REPLACE INTO `' ..
         parangon.config.charDbName ..
         '`.`characters_parangon` VALUES (' ..
@@ -352,7 +355,7 @@ function savePlayerPoints(player)
         pGuid ..
         ', ' ..
         strength ..
-        ', ' .. agility .. ', ' .. stamina .. ', ' .. intellect .. ')')
+        ', ' .. agility .. ', ' .. stamina .. ', ' .. intellect .. ', ' .. spirit .. ')')
 
     parangon_addon.setStats(player)
 end
