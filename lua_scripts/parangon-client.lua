@@ -204,11 +204,8 @@ for id, subtable in pairs(parangon.spellsList) do
         end)
 
     parangon.centerButtons[id]:SetScript("OnMouseWheel", function(self, value)
-        if (value > 0) then
-            AIO.Handle("AIO_Parangon", "setStatsInformation", id, 1, true)
-        else
-            AIO.Handle("AIO_Parangon", "setStatsInformation", id, 1, false)
-        end
+        AIO.Handle("AIO_Parangon", "setStatsInformation", id, 1, value > 0 and true or false)
+
     end)
 
     parangon.centerText[id] = parangon.centerButtons[id]:CreateFontString(
