@@ -116,53 +116,61 @@ function parangon_addon.setStats(player)
     end
 end
 
+
+local prevTime = os.clock()
 -- flags
 -- true == add_points
 -- false == remove_points
 function parangon_addon.setStatsInformation(player, stat, value, flags)
-    local pCombat = player:IsInCombat()
+    local currentTime = os.clock()
 
-    if (not pCombat) then
-
-        local pLevel = player:GetLevel()
-        local paragonPoints =player:GetData('parangon_points')
-        local statValue = player:GetData('parangon_stats_' .. stat)
-        local paragonPointsSpend = player:GetData('parangon_points_spend')
-        if (pLevel >= parangon.config.minLevel) then
-            if flags then
-
-                if ((paragonPoints - value) >= 0 and statValue + value <= 255) then
-                    player:SetData('parangon_stats_' .. stat,
-                        (statValue + value))
-                    player:SetData('parangon_points',
-                        (paragonPoints - value))
-
-
-                    player:SetData('parangon_points_spend',
-                        (paragonPointsSpend + value))
-
-                    SavePlayerPoints(player)
-                else
-                    return false
-                end
-            else
-                if (statValue > 0) then
-                    player:SetData('parangon_stats_' .. stat,
-                        (statValue - value))
-                    player:SetData('parangon_points',
-                        (paragonPoints + value))
-
-                    player:SetData('parangon_points_spend',
-                        (paragonPointsSpend - value))
-
-                    SavePlayerPoints(player)
-                else
-                    return false
-                end
-            end
-            parangon.setAddonInfo(player)
-        end
+    if(currentTime - prevTime < 0.01) then
+        return
     end
+
+    if(player:IsInCombat())then
+        return
+    end
+
+    local pLevel = player:GetLevel()
+    local paragonPoints =player:GetData('parangon_points')
+    local statValue = player:GetData('parangon_stats_' .. stat)
+    local paragonPointsSpend = player:GetData('parangon_points_spend')
+    if (pLevel >= parangon.config.minLevel) then
+        if flags then
+            if ((paragonPoints - value) >= 0 and statValue + value <= 255) then
+                player:SetData('parangon_stats_' .. stat,
+                    (statValue + value))
+                player:SetData('parangon_points',
+                    (paragonPoints - value))
+
+
+                player:SetData('parangon_points_spend',
+                    (paragonPointsSpend + value))
+
+                SavePlayerPoints(player)
+            else
+                return false
+            end
+        else
+            if (statValue > 0) then
+                player:SetData('parangon_stats_' .. stat,
+                    (statValue - value))
+                player:SetData('parangon_points',
+                    (paragonPoints + value))
+
+                player:SetData('parangon_points_spend',
+                    (paragonPointsSpend - value))
+
+                SavePlayerPoints(player)
+            else
+                return false
+            end
+        end
+        parangon.setAddonInfo(player)
+    end
+
+    prevTime = currentTime
 end
 
 function Player:setParangonInfo(strength, agility, stamina, intellect, spirit)
