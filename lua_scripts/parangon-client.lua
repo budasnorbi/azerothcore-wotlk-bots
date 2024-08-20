@@ -29,7 +29,7 @@ local parangon_addon = AIO.AddHandlers("AIO_Parangon", {})
 
 -- Create the main window frame
 parangon.mainWindow = CreateFrame("Frame", parangon.mainWindow, UIParent)
-parangon.mainWindow:SetSize(300, 480)
+parangon.mainWindow:SetSize(300, 520)
 parangon.mainWindow:EnableMouse(true)
 parangon.mainWindow:SetPoint("CENTER", 0, 50)
 parangon.mainWindow:Hide()
@@ -129,7 +129,7 @@ parangon.expText:SetShadowOffset(0.5, 0)
 
 parangon.buttonsCoords = {
     global = {
-        pos_y = 35
+        pos_y = 55
     }
 }
 
@@ -245,7 +245,7 @@ end
 parangon.pointsLeft = parangon.mainWindow:CreateFontString(parangon.pointsLeft)
 parangon.pointsLeft:SetFont("Fonts/FRIZQT__.TTF", 12)
 parangon.pointsLeft:SetSize(999, 4)
-parangon.pointsLeft:SetPoint("BOTTOM", 0, 40)
+parangon.pointsLeft:SetPoint("BOTTOM", 0, 30)
 parangon.pointsLeft:SetShadowColor(0, 0, 0)
 parangon.pointsLeft:SetShadowOffset(1, 1)
 
@@ -330,7 +330,7 @@ function parangon_addon.setInfo(player, stats, level, points, exps)
     end
 
     parangon.levelText:SetText("|CFFFFFFFF" .. level)
-    parangon.pointsLeft:SetText("You still have |CFF00CE00" ..
+    parangon.pointsLeft:SetText("You have |CFF00CE00" ..
         points .. "|r left to spend.")
 
     parangon.expText:SetText("|CFFC758FE(" ..

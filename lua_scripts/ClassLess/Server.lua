@@ -138,7 +138,14 @@ end
 function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
     local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
+
     local guid = player:GetGUIDLow()
+    spells[guid] = spr
+    tpells[guid] = tpr
+    DBWrite(guid, "spells", toString(spr))
+    DBWrite(guid, "tpells", toString(tpr))
+
+    player:SaveToDB()
     for i = 1, #spr do
         local spell = spr[i]
         if not player:HasSpell(spell) then
@@ -157,23 +164,21 @@ function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
             player:RemoveSpell(spell)
         end
     end
-    spells[guid] = spr
-    tpells[guid] = tpr
-    DBWrite(guid, "spells", toString(spr))
-    DBWrite(guid, "tpells", toString(tpr))
-    player:SaveToDB()
 end
 
 function MyHandlers.LearnTalent(player, tar, clientSecret)
     local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
     local guid = player:GetGUIDLow()
+
     for i = 1, #tar do
         local spell = tar[i]
+
         if not player:HasSpell(spell) then
             player:LearnSpell(spell)
         end
     end
+
     for i = 1, #talents[guid] do
         local talent = talents[guid][i]
         if not tContains(tar, talent) then
