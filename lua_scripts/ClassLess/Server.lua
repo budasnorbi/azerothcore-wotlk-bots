@@ -49,6 +49,9 @@ local spells, tpells, talents, stats, resets = {}, {}, {}, {}, {}
 local AttributesAuraIds = { 7464, 7471, 7477, 7468, 7474 } -- Strength, Agility, Stamina, Intellect, Spirit
 
 local function SendVars(msg, player, resend)
+    if(player:IsBot())then
+        return
+    end
     local guid = player:GetGUIDLow()
     local sendspells = spells[guid] or ""
     local sendtpells = tpells[guid] or ""
@@ -94,6 +97,9 @@ end
 
 --Utility Functions
 local function OnLogin(event, player)
+    if(player:IsBot())then
+        return
+    end
     local guid = player:GetGUIDLow()
     local sp, tsp, tal, sta, reset = "", "", "", "0,0,0,0,0", 0
     local querry = CharDBQuery("SELECT * FROM character_classless WHERE guid = " .. guid)
@@ -110,6 +116,9 @@ local function OnLogin(event, player)
 end
 
 local function OnLogout(event, player)
+    if(player:IsBot())then
+        return
+    end
     local guid = player:GetGUIDLow()
     DBWrite(guid, "spells", toString(spells[guid]))
     DBWrite(guid, "tpells", toString(tpells[guid]))
@@ -136,6 +145,9 @@ if plrs then
 end
 
 function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
+    if(player:IsBot())then
+        return
+    end
     local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
 
@@ -167,6 +179,9 @@ function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
 end
 
 function MyHandlers.LearnTalent(player, tar, clientSecret)
+    if(player:IsBot())then
+        return
+    end
     local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
     local guid = player:GetGUIDLow()
@@ -191,6 +206,9 @@ function MyHandlers.LearnTalent(player, tar, clientSecret)
 end
 
 function MyHandlers.WipeAll(player, clientSecret)
+    if(player:IsBot())then
+        return
+    end
     local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
 

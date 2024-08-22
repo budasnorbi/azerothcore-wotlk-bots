@@ -11961,6 +11961,36 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 {
     uint32 raceMask  = getRaceMask();
     uint32 classMask = getClassMask();
+
+    QueryResult result = CharacterDatabase.Query("SELECT spells FROM character_classless WHERE GUID = {}", GetGUID().GetRawValue());
+    std::vector<uint32_t> spells;
+
+    if (result)
+    {
+        std::string fields = result->Fetch()[0].Get<std::string>();
+
+        // Split the string by commas
+        std::istringstream ss(fields);
+        std::string token;
+
+        while (std::getline(ss, token, ','))
+        {
+            try
+            {
+                uint32_t spell = static_cast<uint32_t>(std::stoul(token));
+                spells.push_back(spell);
+            }
+            catch (const std::invalid_argument& e)
+            {
+                std::cerr << "Invalid number: " << token << std::endl;
+            }
+            catch (const std::out_of_range& e)
+            {
+                std::cerr << "Number out of range: " << token << std::endl;
+            }
+        }
+    }
+
     for (SkillLineAbilityEntry const* pAbility : GetSkillLineAbilitiesBySkillLine(skill_id))
     {
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pAbility->Spell);
@@ -12011,6 +12041,11 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
                 {
                     continue;
                 }
+            }
+
+
+            if (std::find(spells.begin(), spells.end(), pAbility->Spell) == spells.end() && pAbility->ClassMask) {
+                continue;
             }
 
             if (!IsInWorld())

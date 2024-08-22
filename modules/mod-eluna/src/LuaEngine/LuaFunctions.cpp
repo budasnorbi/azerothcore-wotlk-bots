@@ -536,6 +536,7 @@ ElunaRegister<Player> PlayerMethods[] =
     { "GetNextRandomRaidMember", &LuaPlayer::GetNextRandomRaidMember },
     { "GetOriginalGroup", &LuaPlayer::GetOriginalGroup },
     { "GetOriginalSubGroup", &LuaPlayer::GetOriginalSubGroup },
+    { "IsBot", &LuaPlayer::isBot},
 #if defined(TRINITY) || AZEROTHCORE
     { "GetChampioningFaction", &LuaPlayer::GetChampioningFaction },
 #endif

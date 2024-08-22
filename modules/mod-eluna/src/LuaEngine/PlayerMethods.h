@@ -17,6 +17,13 @@
 namespace LuaPlayer
 {
 #if (!defined(TBC) && !defined(CLASSIC))
+    
+    int isBot(lua_State* L, Player* player)
+    {
+        Eluna::Push(L, player->GetSession()->IsBot());
+        return 1;
+    }
+
     /**
      * Returns `true` if the [Player] can Titan Grip, `false` otherwise.
      *

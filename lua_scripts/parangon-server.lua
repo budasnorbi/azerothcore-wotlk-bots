@@ -54,6 +54,10 @@ local parangon_addon = AIO.AddHandlers("AIO_Parangon", {})
 parangon.account = {}
 
 function parangon_addon.sendInformations(msg, player)
+    if(player:IsBot()) then
+        return
+    end
+
     local pGuid = player:GetGUIDLow()
     local pAcc = player:GetAccountId()
 
@@ -88,6 +92,10 @@ end
 AIO.AddOnInit(parangon_addon.sendInformations)
 
 function parangon.setAddonInfo(player)
+    if(player:IsBot()) then
+        return
+    end
+
     parangon_addon.sendInformations(AIO.Msg(), player):Send(player)
 end
 
@@ -101,9 +109,13 @@ function parangon.onServerStart(event)
     io.write('Eluna :: Parangon System start \n')
 end
 
-RegisterServerEvent(14, parangon.onServerStart)
+
 
 function parangon_addon.setStats(player)
+    if(player:IsBot()) then
+        return
+    end
+
     local pLevel = player:GetLevel()
 
     if pLevel >= parangon.config.minLevel then
@@ -122,13 +134,13 @@ local prevTime = os.clock()
 -- true == add_points
 -- false == remove_points
 function parangon_addon.setStatsInformation(player, stat, value, flags)
-    local currentTime = os.clock()
-
-    if(currentTime - prevTime < 0.01) then
+    if(player:IsInCombat())then
         return
     end
 
-    if(player:IsInCombat())then
+    local currentTime = os.clock()
+
+    if(currentTime - prevTime < 0.01) then
         return
     end
 
@@ -182,6 +194,10 @@ function Player:setParangonInfo(strength, agility, stamina, intellect, spirit)
 end
 
 function parangon.onLogin(event, player)
+    if(player:IsBot()) then
+        return
+    end
+
     local pAcc = player:GetAccountId()
     local pGuid = player:GetGUIDLow()
 
@@ -241,18 +257,24 @@ function parangon.onLogin(event, player)
         player:GetData('parangon_points'))
 end
 
-RegisterPlayerEvent(3, parangon.onLogin)
+
 
 function parangon.getPlayers(event)
     for _, player in pairs(GetPlayersInWorld()) do
+        if(player:IsBot()) then goto continue end
         parangon.onLogin(event, player)
+        ::continue::
     end
     io.write('Eluna :: Parangon System start \n')
 end
 
-RegisterServerEvent(33, parangon.getPlayers)
+
 
 function parangon.onLogout(event, player)
+    if(player:IsBot()) then
+        return
+    end
+
     SavePlayerPoints(player)
 
     local pAcc = player:GetAccountId()
@@ -272,17 +294,22 @@ function parangon.onLogout(event, player)
         pAcc .. ', ' .. level .. ', ' .. exp .. ')')
 end
 
-RegisterPlayerEvent(4, parangon.onLogout)
 
 function parangon.setPlayers(event)
     for _, player in pairs(GetPlayersInWorld()) do
+        if(player:IsBot()) then goto continue end
         parangon.onLogout(event, player)
+        ::continue::
     end
 end
 
-RegisterServerEvent(16, parangon.setPlayers)
+
 
 function parangon.setExp(player, victim)
+    if(player:IsBot()) then
+        return
+    end
+
     local pAcc = player:GetAccountId()
 
     if not parangon.account[pAcc] then
@@ -317,6 +344,10 @@ function parangon.setExp(player, victim)
 end
 
 function parangon.onKillCreatureOrPlayer(event, player, victim)
+    if(player:IsBot()) then
+        return
+    end
+
     local pLevel = player:GetLevel()
 
     if (pLevel >= parangon.config.minLevel) then
@@ -331,8 +362,7 @@ function parangon.onKillCreatureOrPlayer(event, player, victim)
         end
     end
 end
-RegisterPlayerEvent(6, parangon.onKillCreatureOrPlayer)
-RegisterPlayerEvent(7, parangon.onKillCreatureOrPlayer)
+
 
 function Player:SetParangonLevel(level)
     local pAcc = self:GetAccountId()
@@ -357,6 +387,10 @@ function Player:SetParangonLevel(level)
 end
 
 function SavePlayerPoints(player)
+    if(player:IsBot())then
+        return
+    end
+
     local pAcc = player:GetAccountId()
     local pGuid = player:GetGUIDLow()
 
@@ -378,3 +412,12 @@ function SavePlayerPoints(player)
 
     parangon_addon.setStats(player)
 end
+
+RegisterPlayerEvent(4, parangon.onLogout)
+RegisterPlayerEvent(3, parangon.onLogin)
+RegisterPlayerEvent(6, parangon.onKillCreatureOrPlayer)
+RegisterPlayerEvent(7, parangon.onKillCreatureOrPlayer)
+
+RegisterServerEvent(16, parangon.setPlayers)
+RegisterServerEvent(14, parangon.onServerStart)
+RegisterServerEvent(33, parangon.getPlayers)

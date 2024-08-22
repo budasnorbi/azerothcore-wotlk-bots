@@ -33,6 +33,10 @@ public:
     LearnSpellsOnLevelUp() : PlayerScript("LearnSpellsOnLevelUp") {}
 
     void OnFirstLogin(Player *player) override{
+        if(player->GetSession()->IsBot()){
+            return;
+        }
+
         for (std::pair<std::string, uint32> skillLine : skills) {
             player->SetSkill(skillLine.second, 5, 1, 5);
         }
@@ -93,11 +97,19 @@ public:
 
     void OnLearnSpell(Player *player, uint32 spellID) override
     {
+        if (player->GetSession()->IsBot()) {
+            return;
+        }
+
         learnClasslessSpellRanks(player);
     }
 
     void OnLevelChanged(Player *player, uint8 oldLevel) override
     {
+        if (player->GetSession()->IsBot()) {
+            return;
+        }
+
         learnClasslessSpellRanks(player);
     }
 
