@@ -145,43 +145,37 @@ if plrs then
 end
 
 function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
-    if(player:IsBot())then
-        return
-    end
-    local isValid = checkSecret(player, clientSecret, serverSecret)
-    if not (isValid) then return end
-
+	local isValid = checkSecret(player, clientSecret, serverSecret)
+	if not (isValid) then return end
     local guid = player:GetGUIDLow()
+    for i = 1, #spr do
+        local spell = spr[i]
+        if not player:HasSpell(spell) then
+
+            player:LearnSpell(spell)
+        end
+    end
+	for i = 1, #spells[guid] do
+  local spell = spells[guid][i]
+  if not tContains(spr, spell) then
+    player:RemoveSpell(spell)
+  end
+end
+for i = 1, #tpells[guid] do
+  local spell = tpells[guid][i]
+  if not tContains(spr, spell) then
+    player:RemoveSpell(spell)
+  end
+end
     spells[guid] = spr
     tpells[guid] = tpr
     DBWrite(guid, "spells", toString(spr))
     DBWrite(guid, "tpells", toString(tpr))
-
     player:SaveToDB()
-    for i = 1, #spr do
-        local spell = spr[i]
-        if not player:HasSpell(spell) then
-            player:LearnSpell(spell)
-        end
-    end
-    for i = 1, #spells[guid] do
-        local spell = spells[guid][i]
-        if not tContains(spr, spell) then
-            player:RemoveSpell(spell)
-        end
-    end
-    for i = 1, #tpells[guid] do
-        local spell = tpells[guid][i]
-        if not tContains(spr, spell) then
-            player:RemoveSpell(spell)
-        end
-    end
 end
 
 function MyHandlers.LearnTalent(player, tar, clientSecret)
-    if(player:IsBot())then
-        return
-    end
+
     local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
     local guid = player:GetGUIDLow()

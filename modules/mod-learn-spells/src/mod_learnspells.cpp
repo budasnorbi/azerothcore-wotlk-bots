@@ -37,6 +37,8 @@ public:
             return;
         }
 
+        player->learnSpell(75);
+
         for (std::pair<std::string, uint32> skillLine : skills) {
             player->SetSkill(skillLine.second, 5, 1, 5);
         }

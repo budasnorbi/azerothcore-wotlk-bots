@@ -140,7 +140,7 @@ function parangon_addon.setStatsInformation(player, stat, value, flags)
 
     local currentTime = os.clock()
 
-    if(currentTime - prevTime < 0.01) then
+    if(currentTime - prevTime < 0.05) then
         return
     end
 
@@ -157,6 +157,7 @@ function parangon_addon.setStatsInformation(player, stat, value, flags)
                     (paragonPoints - value))
 
 
+                    print('Parangon Points: ' .. paragonPoints)
                 player:SetData('parangon_points_spend',
                     (paragonPointsSpend + value))
 
@@ -171,6 +172,7 @@ function parangon_addon.setStatsInformation(player, stat, value, flags)
                 player:SetData('parangon_points',
                     (paragonPoints + value))
 
+                    print('Parangon Points: ' .. paragonPoints)
                 player:SetData('parangon_points_spend',
                     (paragonPointsSpend - value))
 
@@ -215,9 +217,10 @@ function parangon.onLogin(event, player)
         local intellect = getParangonCharInfo:GetUInt8(5)
         local spirit = getParangonCharInfo:GetUInt8(6)
 
-        local allPoints = strength + agility + stamina + intellect + spirit
+        local pointSpend = strength + agility + stamina + intellect + spirit
         player:setParangonInfo(strength, agility, stamina, intellect, spirit)
-        player:SetData('parangon_points',allPoints)
+        player:SetData('parangon_points', pointSpend)
+        player:SetData('parangon_points_spend', pointSpend)
     else
 
         CharDBExecute('INSERT INTO `' ..
@@ -226,8 +229,10 @@ function parangon.onLogin(event, player)
             pAcc .. ', ' .. pGuid .. ', 0, 0, 0, 0, 0)')
         player:setParangonInfo(0, 0, 0, 0, 0)
         player:SetData('parangon_points', 0)
+        player:SetData('parangon_points_spend', 0)
     end
-    player:SetData('parangon_points_spend', 0)
+
+
 
     if not parangon.account[pAcc] then
         parangon.account[pAcc] = {
@@ -306,10 +311,6 @@ end
 
 
 function parangon.setExp(player, victim)
-    if(player:IsBot()) then
-        return
-    end
-
     local pAcc = player:GetAccountId()
 
     if not parangon.account[pAcc] then
@@ -339,7 +340,7 @@ function parangon.setExp(player, victim)
     end
 
     if parangon.account[pAcc].exp >= parangon.account[pAcc].exp_max then
-        player:SetParangonLevel(1)
+        player:SetParangonLevel()
     end
 end
 
@@ -352,7 +353,6 @@ function parangon.onKillCreatureOrPlayer(event, player, victim)
 
     if (pLevel >= parangon.config.minLevel) then
         local pGroup = player:GetGroup()
-        local vLevel = victim:GetLevel()
         if pGroup then
             for _, player in pairs(pGroup:GetMembers()) do
                 parangon.setExp(player, victim)
@@ -364,26 +364,41 @@ function parangon.onKillCreatureOrPlayer(event, player, victim)
 end
 
 
-function Player:SetParangonLevel(level)
+function Player:SetParangonLevel()
     local pAcc = self:GetAccountId()
 
     if not parangon.account[pAcc] then
         return
     end
 
-    parangon.account[pAcc].level = parangon.account[pAcc].level + level
+
+    parangon.account[pAcc].level = parangon.account[pAcc].level + 1
+
     parangon.account[pAcc].exp = 0
     parangon.account[pAcc].exp_max = parangon.config.expMax *
         parangon.account[pAcc].level
-    self:SetData('parangon_points',
-        (((parangon.account[pAcc].level * parangon.config.pointsPerLevel) - self:GetData('parangon_points')) + self:GetData('parangon_points') - self:GetData('parangon_points_spend')))
+
+    -- Get the current level and points information
+    local pointsSpent = self:GetData('parangon_points_spend') or 0
+    local currentLevel = parangon.account[pAcc].level
+
+    -- Calculate the total points that should be available based on the current level
+    local totalEarnedPoints = currentLevel * parangon.config.pointsPerLevel
+
+    -- Calculate the new points available to spend
+    local newAvailablePoints = totalEarnedPoints - pointsSpent
+
+
+    -- Update the parangon points
+    self:SetData('parangon_points', newAvailablePoints)
+
     parangon.setAddonInfo(self)
 
-    self:CastSpell(self, 24312, true)
-    self:RemoveAura(24312)
+    self:CastSpell(self, 40436, true)
     self:SendNotification(
         '|CFF00A2FFYou have just passed a level of Paragon.\nCongratulations, you are now level ' ..
         parangon.account[pAcc].level .. '!')
+
 end
 
 function SavePlayerPoints(player)
