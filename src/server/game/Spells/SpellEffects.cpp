@@ -3078,8 +3078,8 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
     if (creatureTarget->IsPet())
         return;
 
-    if (!m_caster->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET))
-        return;
+/*     if (!m_caster->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET))
+        return; */
 
     // cast finish successfully
     //SendChannelUpdate(0);
@@ -3210,11 +3210,11 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
     // Reset cooldowns
-    if (!owner->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET))
-    {
+    /* if (!owner->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET))
+    { */
         pet->m_CreatureSpellCooldowns.clear();
         owner->PetSpellInitialize();
-    }
+    /* } */
 
     // Set health to max if new pet is summoned
     // in this function old pet is saved with current health eg. 20% and new one is loaded from db with same amount
@@ -5823,7 +5823,7 @@ void Spell::EffectCreateTamedPet(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->GetPetGUID() || !unitTarget->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET))
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->GetPetGUID() /* || !unitTarget->IsClass(CLASS_HUNTER, CLASS_CONTEXT_PET) */)
         return;
 
     uint32 creatureEntry = m_spellInfo->Effects[effIndex].MiscValue;
