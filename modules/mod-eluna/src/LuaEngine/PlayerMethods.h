@@ -4432,6 +4432,56 @@ namespace LuaPlayer
         return 0;
     }
 
+    int LearnSpellRanks(lua_State* L, Player* player)
+    {
+        // Check if the first argument is a string and retrieve it safely
+        const char* spellIdString = Eluna::CHECKVAL<const char*>(L, 2);
+        uint8 playerLevel = player->GetLevel();
+
+        // Ensure the string is not null
+        if (!spellIdString)
+        {
+            luaL_error(L, "Invalid string parameter. Spell ID string cannot be null.");
+            return 0;
+        }
+
+        try
+        {
+            // Convert the string to uint32_t
+            uint32_t spellId = static_cast<uint32_t>(std::stoul(spellIdString));
+
+            // Retrieve spell information
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+
+            // Check if spell info was found
+            if (!spellInfo)
+            {
+                luaL_error(L, "Spell ID %u is invalid or not found.", spellId);
+                return 0;
+            }
+
+            // Get the next rank spell
+            SpellInfo const* nextRank = spellInfo->GetNextRankSpell();
+
+            while (nextRank && playerLevel >= nextRank->BaseLevel) {
+                player->learnSpell(nextRank->Id);
+                nextRank = nextRank->GetNextRankSpell();
+            }
+
+            return 1;
+        }
+        catch (const std::invalid_argument& e)
+        {
+            luaL_error(L, "Invalid format for Spell ID: %s. Conversion failed.", spellIdString);
+            return 0;
+        }
+        catch (const std::out_of_range& e)
+        {
+            luaL_error(L, "Spell ID is out of range: %s", spellIdString);
+            return 0;
+        }
+    }
+
     /*int BindToInstance(lua_State* L, Player* player)
     {
     player->BindToInstance();

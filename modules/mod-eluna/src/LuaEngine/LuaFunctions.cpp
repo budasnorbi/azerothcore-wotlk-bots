@@ -468,6 +468,7 @@ ElunaRegister<Unit> UnitMethods[] =
 ElunaRegister<Player> PlayerMethods[] =
 {
     // Getters
+    { "LearnSpellRanks", &LuaPlayer::LearnSpellRanks},
     { "GetSelection", &LuaPlayer::GetSelection },
     { "GetGMRank", &LuaPlayer::GetGMRank },
     { "GetGuildId", &LuaPlayer::GetGuildId },

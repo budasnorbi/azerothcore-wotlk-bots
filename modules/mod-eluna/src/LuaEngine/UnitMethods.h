@@ -2650,6 +2650,7 @@ namespace LuaUnit
         return 0;
     }
 
+    
     /*int RestoreDisplayId(lua_State* L, Unit* unit)
     {
         unit->RestoreDisplayId();

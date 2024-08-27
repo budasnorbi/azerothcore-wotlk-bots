@@ -151,8 +151,8 @@ function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
     for i = 1, #spr do
         local spell = spr[i]
         if not player:HasSpell(spell) then
-
             player:LearnSpell(spell)
+            player:LearnSpellRanks(spell)
         end
     end
 	for i = 1, #spells[guid] do
@@ -185,6 +185,7 @@ function MyHandlers.LearnTalent(player, tar, clientSecret)
 
         if not player:HasSpell(spell) then
             player:LearnSpell(spell)
+            player:LearnSpellRanks(spell)
         end
     end
 
@@ -262,8 +263,29 @@ function MyHandlers.WipeAll(player, clientSecret)
     SendVars(AIO.Msg(), player, true)
 end
 
-local function PLAYER_EVENT_ON_SAVE(event, player)
-    player:SendBroadcastMessage("You're saved! :)")
-end
+RegisterPlayerEvent(13, function(event, player)
+    if(player:IsBot())then
+        return
+    end
 
--- RegisterPlayerEvent( 25, PLAYER_EVENT_ON_SAVE )
+    local guid = player:GetGUIDLow()
+    local querry = CharDBQuery("SELECT spells, talents FROM character_classless WHERE guid = " .. guid)
+
+    if querry == nil then
+        return
+    else
+
+    local spells = toTable(querry:GetString(0))
+    local talents = toTable(querry:GetString(1))
+
+    for i = 1, #spells do
+        local spell = spells[i]
+        player:LearnSpellRanks(spell)
+    end
+
+    for i = 1, #talents do
+        local spell = talents[i]
+        player:LearnSpellRanks(spell)
+    end
+end
+end)

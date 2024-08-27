@@ -140,7 +140,7 @@ function parangon_addon.setStatsInformation(player, stat, value, flags)
 
     local currentTime = os.clock()
 
-    if(currentTime - prevTime < 0.05) then
+    if(currentTime - prevTime < 0.1) then
         return
     end
 
