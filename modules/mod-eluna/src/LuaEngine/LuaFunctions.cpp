@@ -40,6 +40,7 @@ extern "C"
 #include "AchievementMethods.h"
 #include "ItemTemplateMethods.h"
 #include "RollMethods.h"
+#include "LootMethods.h"
 
 luaL_Reg GlobalMethods[] =
 {
@@ -846,6 +847,8 @@ ElunaRegister<Creature> CreatureMethods[] =
 #endif
     { "GetDBTableGUIDLow", &LuaCreature::GetDBTableGUIDLow },
     { "GetCreatureFamily", &LuaCreature::GetCreatureFamily },
+    { "GetLoot", &LuaCreature::GetLoot },
+    { "AllLootRemoved", &LuaCreature::AllLootRemoved },
 
     // Setters
 #if defined(TRINITY) || defined(AZEROTHCORE)
@@ -1418,6 +1421,29 @@ ElunaRegister<Roll> RollMethods[] =
     { NULL, NULL }
 };
 
+ElunaRegister<Loot> LootMethods[] =
+{
+    // Get
+    { "GetMoney", &LuaLoot::GetMoney },
+    { "GetItems", &LuaLoot::GetItems },
+    { "GetUnlootedCount", &LuaLoot::GetUnlootedCount },
+
+    // Set
+    { "AddItem", &LuaLoot::AddItem },
+    { "RemoveItem", &LuaLoot::RemoveItem },
+    { "SetMoney", &LuaLoot::SetMoney },
+    { "SetUnlootedCount", &LuaLoot::SetUnlootedCount },
+    { "UpdateItemIndex", &LuaLoot::UpdateItemIndex },
+    { "SetItemLooted", &LuaLoot::SetItemLooted },
+
+    // Boolean
+    { "IsLooted", &LuaLoot::IsLooted },
+    { "HasItem", &LuaLoot::HasItem },
+    { "Clear", &LuaLoot::Clear },
+
+    { NULL, NULL }
+};
+
 #if (!defined(TBC) && !defined(CLASSIC))
 // fix compile error about accessing vehicle destructor
 template<> int ElunaTemplate<Vehicle>::CollectGarbage(lua_State* L)
@@ -1568,6 +1594,9 @@ void RegisterFunctions(Eluna* E)
 
     ElunaTemplate<Roll>::Register(E, "Roll");
     ElunaTemplate<Roll>::SetMethods(E, RollMethods);
+
+    ElunaTemplate<Loot>::Register(E, "Loot");
+    ElunaTemplate<Loot>::SetMethods(E, LootMethods);
 
     ElunaTemplate<long long>::Register(E, "long long", true);
 

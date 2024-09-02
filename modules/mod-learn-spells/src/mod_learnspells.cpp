@@ -37,7 +37,15 @@ public:
             return;
         }
 
+        // learn shoot spell
         player->learnSpell(75);
+        // learn mail spell
+        player->learnSpell(8737);
+        // learn plate spell
+        player->learnSpell(750);
+        // learn shield
+        player->learnSpell(9116);
+
 
         for (std::pair<std::string, uint32> skillLine : skills) {
             player->SetSkill(skillLine.second, 5, 1, 5);
@@ -97,7 +105,7 @@ public:
         }
     }
 
-  
+
 };
 
 void AddSC_LearnAllSpells()

@@ -348,31 +348,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     }
                     break;
                 }
-            case SPELLFAMILY_WARRIOR:
-                {
-                    // Shield Slam
-                    if (m_spellInfo->SpellFamilyFlags[1] & 0x200 && m_spellInfo->GetCategory() == 1209)
-                    {
-                        uint8 level = m_caster->GetLevel();
-                        // xinef: shield block should increase the limit
-                        float limit = m_caster->HasAura(2565) ? 2.0f : 1.0f;
-                        uint32 block_value = m_caster->GetShieldBlockValue(uint32(float(level) * 24.5f * limit), uint32(float(level) * 34.5f * limit));
-
-                        damage += int32(m_caster->ApplyEffectModifiers(m_spellInfo, effIndex, float(block_value)));
-                    }
-                    // Victory Rush
-                    else if (m_spellInfo->SpellFamilyFlags[1] & 0x100)
-                        ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-                    // Shockwave
-                    else if (m_spellInfo->Id == 46968)
-                    {
-                        int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
-                        if (pct > 0)
-                            damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
-                        break;
-                    }
-                    break;
-                }
             case SPELLFAMILY_WARLOCK:
                 {
                     // Incinerate Rank 1 & 2
@@ -472,6 +447,27 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 }
             case SPELLFAMILY_DRUID:
                 {
+                    // Shield Slam
+                    if (m_spellInfo->SpellFamilyFlags[1] & 0x200 && m_spellInfo->GetCategory() == 1209)
+                    {
+                        uint8 level = m_caster->GetLevel();
+                        // xinef: shield block should increase the limit
+                        float limit = m_caster->HasAura(2565) ? 2.0f : 1.0f;
+                        uint32 block_value = m_caster->GetShieldBlockValue(uint32(float(level) * 24.5f * limit), uint32(float(level) * 34.5f * limit));
+
+                        damage += int32(m_caster->ApplyEffectModifiers(m_spellInfo, effIndex, float(block_value)));
+                    }
+                    // Victory Rush
+                    else if (m_spellInfo->SpellFamilyFlags[1] & 0x100)
+                        ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
+                    // Shockwave
+                    else if (m_spellInfo->Id == 46968)
+                    {
+                        int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
+                        if (pct > 0)
+                            damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
+                    }
+
                     // Ferocious Bite
                     if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
                     {

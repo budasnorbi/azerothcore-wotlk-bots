@@ -12157,21 +12157,12 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
             }
         case SPELL_DAMAGE_CLASS_MELEE:
             // Custom crit by class
-            if (caster)
-            {
-                switch (spellProto->SpellFamilyName)
-                {
-                case SPELLFAMILY_DRUID:
-                    // Rend and Tear - bonus crit chance for Ferocious Bite on bleeding targets
-                    if (spellProto->SpellFamilyFlags[0] & 0x00800000 && spellProto->SpellIconID == 1680 && HasAuraState(AURA_STATE_BLEEDING))
+                if (spellProto->SpellFamilyFlags[0] & 0x00800000 && spellProto->SpellIconID == 1680 && HasAuraState(AURA_STATE_BLEEDING))
                     {
                         if (AuraEffect const* rendAndTear = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2859, 1))
                             crit_chance += rendAndTear->GetAmount();
                         break;
                     }
-                    break;
-                case SPELLFAMILY_WARRIOR:
-                    // Victory Rush
                     if (spellProto->SpellFamilyFlags[1] & 0x100)
                     {
                         // Glyph of Victory Rush
@@ -12180,8 +12171,6 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                         break;
                     }
                     break;
-                }
-            }
 
             // 100% critical chance against sitting target
             if (GetTypeId() == TYPEID_PLAYER && (IsSitState() || getStandState() == UNIT_STAND_STATE_SLEEP))
