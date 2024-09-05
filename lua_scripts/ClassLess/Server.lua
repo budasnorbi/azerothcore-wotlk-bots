@@ -175,91 +175,98 @@ end
 end
 
 function MyHandlers.LearnTalent(player, tar, clientSecret)
-
-    local isValid = checkSecret(player, clientSecret, serverSecret)
-    if not (isValid) then return end
+	local isValid = checkSecret(player, clientSecret, serverSecret)
+	if not (isValid) then return end
     local guid = player:GetGUIDLow()
 
     for i = 1, #tar do
         local spell = tar[i]
-
         if not player:HasSpell(spell) then
             player:LearnSpell(spell)
-            player:LearnSpellRanks(spell)
         end
     end
 
-    for i = 1, #talents[guid] do
+    local copiedTalent = {}
+	for i = 1, #talents[guid] do
         local talent = talents[guid][i]
         if not tContains(tar, talent) then
             player:RemoveSpell(talent)
+            copiedTalent[i] = talent
         end
     end
+
     talents[guid] = tar
     DBWrite(guid, "talents", toString(tar))
     player:SaveToDB()
+
+    for i = 1, #copiedTalent do
+        CharDBExecute("DELETE FROM character_spell WHERE spell = " .. copiedTalent[i] .. " AND guid = " .. guid)
+    end
+
 end
 
 function MyHandlers.WipeAll(player, clientSecret)
-    if(player:IsBot())then
-        return
-    end
-    local isValid = checkSecret(player, clientSecret, serverSecret)
+	local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
 
     local guid = player:GetGUIDLow()
 
-    rst = resets[guid] + 1
-    if (rst > #prices) then
-        rst = #prices
-    end
-
-    price = prices[rst]
-    if (player:GetCoinage() < price) then
-        player:SendNotification("Not enough money to reset.")
-        return
-    end
-
-    player:ModifyMoney(-price)
-
     table.sort(spells[guid], function(a, b) return a > b end)
     table.sort(tpells[guid], function(a, b) return a > b end)
     table.sort(talents[guid], function(a, b) return a > b end)
-    for i = 1, #spells[guid] do
-        local spell = spells[guid][i]
+
+    local copiedSpells = {}
+    for i=1,#spells[guid] do
+        local spell=spells[guid][i]
         if player:HasSpell(spell) then
             player:RemoveSpell(spell)
+            copiedSpells[i] = spell
         end
     end
 
-    for i = 1, #tpells[guid] do
-        local spell = tpells[guid][i]
+    local copiedTpells = {}
+    for i=1,#tpells[guid] do
+        local spell=tpells[guid][i]
         if player:HasSpell(spell) then
             player:RemoveSpell(spell)
-            player:RemoveSpell(spell)
+            copiedTpells[i] = spell
         end
     end
 
-    for i = 1, #talents[guid] do
-        local spell = talents[guid][i]
+    local copiedTalents = {}
+    for i=1,#talents[guid] do
+        local spell=talents[guid][i]
         if player:HasSpell(spell) then
             player:RemoveSpell(spell)
+            copiedTalents[i] = spell
         end
     end
 
-    spells[guid] = {}
-    tpells[guid] = {}
-    talents[guid] = {}
-    stats[guid] = { 0, 0, 0, 0, 0 }
+    spells[guid]={}
+    tpells[guid]={}
+    talents[guid]={}
+    stats[guid]={0,0,0,0,0}
 
     resets[guid] = resets[guid] + 1
 
-    DBWrite(guid, "spells", "")
-    DBWrite(guid, "tpells", "")
-    DBWrite(guid, "talents", "")
-    DBWrite(guid, "stats", "0,0,0,0,0")
-    DBWrite(guid, "resets", resets[guid])
+    DBWrite(guid,"spells","")
+    DBWrite(guid,"tpells","")
+    DBWrite(guid,"talents","")
+    DBWrite(guid,"stats","0,0,0,0,0")
+    DBWrite(guid,"resets",resets[guid])
     player:SaveToDB()
+
+    for i=1,#copiedSpells do
+        CharDBExecute("DELETE FROM character_spell WHERE spell = "..copiedSpells[i].." AND guid = "..guid)
+    end
+
+    for i=1,#copiedTpells do
+        CharDBExecute("DELETE FROM character_spell WHERE spell = "..copiedTpells[i].." AND guid = "..guid)
+    end
+
+    for i=1,#copiedTalents do
+        CharDBExecute("DELETE FROM character_spell WHERE spell = "..copiedTalents[i].." AND guid = "..guid)
+    end
     SendVars(AIO.Msg(), player, true)
 end
 
