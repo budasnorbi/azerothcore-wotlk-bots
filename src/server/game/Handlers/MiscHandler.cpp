@@ -742,6 +742,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
     }
 
     AreaTrigger const* atEntry = sObjectMgr->GetAreaTrigger(triggerId);
+    printf("AreaTrigger: %d\n", atEntry->entry);
+
     if (!atEntry)
     {
         LOG_DEBUG("network", "HandleAreaTriggerOpcode: Player '{}' ({}) send unknown (by DBC) Area Trigger ID:{}",

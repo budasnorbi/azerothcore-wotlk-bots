@@ -2,113 +2,212 @@
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include "AreaTriggerScript.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include <string>
 
-std::vector<uint32> professions = {
-    //Primary Professions
-    164, // Blacksmithing
-    165, // Leatherworking
-    171, // Alchemy
-    182, // Herbalism
-    186, // Mining
-    197, // Tailoring
-    202, // Engineering
-    333, // Enchanting
-    393, // Skinning
-    755, // Jewelcrafting
-    773, // Inscription
-    // Secondary Professions
-    356, // Fishing
-    185, // Cooking
-    129, // First Aid
+using namespace std;
+
+enum class PROFFESSION_SKILL_IDS
+{
+    BLACKSMITHING = 164,
+    LEATHERWORKING = 165,
+    ALCHEMY = 171,
+    HERBALISM = 182,
+    MINING = 186,
+    TAILORING = 197,
+    ENGINEERING = 202,
+    ENCHANTING = 333,
+    SKINNING = 393,
+    JEWELCRAFTING = 755,
+    INSCRIPTION = 773,
+    FISHING = 356,
+    COOKING = 185,
+    FIRST_AID = 129,
 };
 
-std::vector<std::pair<std::string, uint32>> skills = {
- {"SWORDS", 43}, {"AXES", 44}, {"BOWS", 45}, {"GUNS", 46}, {"MACES", 54}, {"2H_SWORDS", 55}, {"DEFENSE", 95}, {"STAVES", 136}, {"2H_MACES", 160}, {"2H_AXES", 172}, {"DAGGERS", 173}, {"THROWN", 176}, {"CROSSBOWS", 226},  {"WANDS", 228}, {"POLEARMS", 229}, {"PLATE_MAIL", 293}, {"LEATHER", 414}, {"CLOTH", 415}, {"MAIL", 413}, {"SHIELD", 433}, {"FIST_WEAPONS", 473}, {"LOCKPICKING", 633},
+enum class PROFFESSION_SKILL_SPELLS
+{
+    BLACKSMITHING = 2018,
+    LEATHERWORKING = 2108,
+    ALCHEMY = 2259,
+    HERBALISM = 2366,
+    MINING = 2575,
+    TAILORING = 3908,
+    ENGINEERING = 4036,
+    ENCHANTING = 7411,
+    SKINNING = 8613,
+    INSCRIPTION = 45357,
+    FISHING = 7620,
+    COOKING = 2550,
+    FIRST_AID = 3273,
+    JEWELCRAFTING = 25229,
 };
+
+vector<pair<PROFFESSION_SKILL_IDS, PROFFESSION_SKILL_SPELLS>> autoLearnProfessions = {
+    {PROFFESSION_SKILL_IDS::BLACKSMITHING, PROFFESSION_SKILL_SPELLS::BLACKSMITHING},
+    {PROFFESSION_SKILL_IDS::LEATHERWORKING, PROFFESSION_SKILL_SPELLS::LEATHERWORKING},
+    {PROFFESSION_SKILL_IDS::ALCHEMY, PROFFESSION_SKILL_SPELLS::ALCHEMY},
+    {PROFFESSION_SKILL_IDS::HERBALISM, PROFFESSION_SKILL_SPELLS::HERBALISM},
+    {PROFFESSION_SKILL_IDS::MINING, PROFFESSION_SKILL_SPELLS::MINING},
+    {PROFFESSION_SKILL_IDS::TAILORING, PROFFESSION_SKILL_SPELLS::TAILORING},
+    {PROFFESSION_SKILL_IDS::ENGINEERING, PROFFESSION_SKILL_SPELLS::ENGINEERING},
+    {PROFFESSION_SKILL_IDS::ENCHANTING, PROFFESSION_SKILL_SPELLS::ENCHANTING},
+    {PROFFESSION_SKILL_IDS::SKINNING, PROFFESSION_SKILL_SPELLS::SKINNING},
+    {PROFFESSION_SKILL_IDS::JEWELCRAFTING, PROFFESSION_SKILL_SPELLS::JEWELCRAFTING},
+    {PROFFESSION_SKILL_IDS::INSCRIPTION, PROFFESSION_SKILL_SPELLS::INSCRIPTION},
+    {PROFFESSION_SKILL_IDS::FISHING, PROFFESSION_SKILL_SPELLS::FISHING},
+    {PROFFESSION_SKILL_IDS::COOKING, PROFFESSION_SKILL_SPELLS::COOKING},
+    {PROFFESSION_SKILL_IDS::FIRST_AID, PROFFESSION_SKILL_SPELLS::FIRST_AID},
+};
+
+enum class SKILL_IDS
+{
+    SWORDS = 43,
+    AXES = 44,
+    BOWS = 45,
+    GUNS = 46,
+    MACES = 54,
+    TWO_H_SWORDS = 55,
+    DEFENSE = 95,
+    STAVES = 136,
+    TWO_H_MACES = 160,
+    TWO_H_AXES = 172,
+    DAGGERS = 173,
+    THROWN = 176,
+    CROSSBOWS = 226,
+    WANDS = 228,
+    POLEARMS = 229,
+    SHIELD = 433,
+    FIST_WEAPONS = 473,
+    LOCKPICKING = 633,
+    MAIL = 413,
+    PLATE = 293,
+    LEATHER = 414,
+    CLOTH = 415,
+};
+
+enum class SKILL_SPELL_IDS : uint32_t
+{
+    SWORDS = 201,
+    AXES = 196,
+    BOWS = 264,
+    GUNS = 266,
+    MACES = 198,
+    TWO_H_SWORDS = 202,
+    DEFENSE = 204,
+    STAVES = 227,
+    TWO_H_MACES = 199,
+    TWO_H_AXES = 197,
+    DAGGERS = 1180,
+    THROWN = 2567,
+    CROSSBOWS = 5011,
+    WANDS = 5009,
+    POLEARMS = 200,
+    SHIELD = 9116,
+    FIST_WEAPONS = 15590,
+    MAIL = 8737,
+    PLATE = 750,
+    CLOTH = 9078,
+    LEATHER = 9077,
+    LOCKPICKING = 1804,
+
+    DUAL_WIELD = 674,
+    LANGUAGE_COMMON = 668,
+    LIBRAM = 27762,
+    BLOCK = 107,
+    IDOL = 27764,
+    UNARMED = 203,
+    THROW = 2764,
+    PARRY = 3127,
+    SHOOT = 5019,
+    DODGE = 81,
+    TOTEM = 27763
+};
+
+vector<pair<SKILL_IDS, SKILL_SPELL_IDS>> autoLearnSkills = {
+    {SKILL_IDS::SWORDS, SKILL_SPELL_IDS::SWORDS},
+    {SKILL_IDS::AXES, SKILL_SPELL_IDS::AXES},
+    {SKILL_IDS::BOWS, SKILL_SPELL_IDS::BOWS},
+    {SKILL_IDS::GUNS, SKILL_SPELL_IDS::GUNS},
+    {SKILL_IDS::MACES, SKILL_SPELL_IDS::MACES},
+    {SKILL_IDS::TWO_H_SWORDS, SKILL_SPELL_IDS::TWO_H_SWORDS},
+    {SKILL_IDS::DEFENSE, SKILL_SPELL_IDS::DEFENSE},
+    {SKILL_IDS::STAVES, SKILL_SPELL_IDS::STAVES},
+    {SKILL_IDS::TWO_H_MACES, SKILL_SPELL_IDS::TWO_H_MACES},
+    {SKILL_IDS::TWO_H_AXES, SKILL_SPELL_IDS::TWO_H_AXES},
+    {SKILL_IDS::DAGGERS, SKILL_SPELL_IDS::DAGGERS},
+    {SKILL_IDS::THROWN, SKILL_SPELL_IDS::THROWN},
+    {SKILL_IDS::CROSSBOWS, SKILL_SPELL_IDS::CROSSBOWS},
+    {SKILL_IDS::WANDS, SKILL_SPELL_IDS::WANDS},
+    {SKILL_IDS::POLEARMS, SKILL_SPELL_IDS::POLEARMS},
+    {SKILL_IDS::SHIELD, SKILL_SPELL_IDS::SHIELD},
+    {SKILL_IDS::FIST_WEAPONS, SKILL_SPELL_IDS::FIST_WEAPONS},
+    {SKILL_IDS::LOCKPICKING, SKILL_SPELL_IDS::LOCKPICKING},
+    {SKILL_IDS::MAIL, SKILL_SPELL_IDS::MAIL},
+    {SKILL_IDS::PLATE, SKILL_SPELL_IDS::PLATE},
+    {SKILL_IDS::LEATHER, SKILL_SPELL_IDS::LEATHER},
+    {SKILL_IDS::CLOTH, SKILL_SPELL_IDS::CLOTH},
+
+};
+
+enum DUNGEONS_INSTANCES
+{
+    THE_DEADMINES = 36,
+    RAGEFIRE_CHASM = 389,
+    WAILING_CAVERNS = 43,
+    SHADOWFANG_KEEP = 33,
+    BLACKFATHOM_DEEPS = 48,
+    THE_STOCKADE = 34,
+    GNOMEREGAN = 90,
+    RAZORFEN_KRAUL = 47,
+    SCARLET_MONASTERY = 189,
+};
+
+vector<pair<uint32, uint32>> completedDungeonAchievementIds = {
+    // dungeon instance id, completed achiviement id
+    {THE_DEADMINES, 628},
+    {RAGEFIRE_CHASM, 629},
+    {WAILING_CAVERNS, 630},
+    {SHADOWFANG_KEEP, 631},
+    {BLACKFATHOM_DEEPS, 632},
+    {THE_STOCKADE, 633},
+    {GNOMEREGAN, 634},
+    {RAZORFEN_KRAUL, 635},
+};
+
+
 
 class LearnSpellsOnLevelUp : public PlayerScript
 {
 public:
     LearnSpellsOnLevelUp() : PlayerScript("LearnSpellsOnLevelUp") {}
 
-    void OnFirstLogin(Player *player) override{
-        if(player->GetSession()->IsBot()){
+
+    void OnFirstLogin(Player *player) override
+    {
+        if (player->GetSession()->IsBot())
+        {
             return;
         }
 
-        // learn shoot spell
-        player->learnSpell(75);
-        // learn mail spell
-        player->learnSpell(8737);
-        // learn plate spell
-        player->learnSpell(750);
-        // learn shield
-        player->learnSpell(9116);
-
-
-        for (std::pair<std::string, uint32> skillLine : skills) {
-            player->SetSkill(skillLine.second, 5, 1, 5);
+        for (const auto &skills : autoLearnSkills)
+        {
+            player->SetSkill(static_cast<uint16_t>(skills.first), 5, 1, 5);
+            player->learnSpell(static_cast<uint32_t>(skills.second), false, false);
         }
 
-        for (uint32 skillId : professions)
+        for (const auto &profession : autoLearnProfessions)
         {
-            player->SetSkill(skillId, 75, 1, 1);
-
-            switch (skillId)
-            {
-            case 182: // Herbalism
-                player->learnSpell(2366, false, false);
-                break;
-            case 186: // Mining
-                player->learnSpell(2575, false, false);
-                break;
-            case 393: // Skinning
-                player->learnSpell(8613, false, false);
-                break;
-            case 164: // Blacksmithing
-                player->learnSpell(2018, false, false);
-                break;
-            case 165: // Leatherworking
-                player->learnSpell(2108, false, false);
-                break;
-            case 171: // Alchemy
-                player->learnSpell(2259, false, false);
-                break;
-            case 197: // Tailoring
-                player->learnSpell(3908, false, false);
-                break;
-            case 202: // Engineering
-                player->learnSpell(4036, false, false);
-                break;
-            case 333: // Enchanting
-                player->learnSpell(7411, false, false);
-                break;
-            case 755: // Jewelcrafting
-                player->learnSpell(25229, false, false);
-                break;
-            case 773: // Inscription
-                player->learnSpell(45357, false, false);
-                break;
-            case 356: // Fishing
-                player->learnSpell(7620, false, false);
-                break;
-            case 185: // Cooking
-                player->learnSpell(2550, false, false);
-                break;
-            case 129: // First Aid
-                player->learnSpell(3273, false, false);
-                break;
-            default:
-                break;
-            }
+            player->SetSkill(static_cast<uint16_t>(profession.first), 75, 1, 1);
+            player->learnSpell(static_cast<uint32_t>(profession.second), false, false);
         }
     }
-
-
 };
 
 void AddSC_LearnAllSpells()
 {
     new LearnSpellsOnLevelUp();
+
 }
