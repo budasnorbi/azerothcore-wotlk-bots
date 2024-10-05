@@ -177,8 +177,6 @@ vector<pair<uint32, uint32>> completedDungeonAchievementIds = {
     {RAZORFEN_KRAUL, 635},
 };
 
-
-
 class LearnSpellsOnLevelUp : public PlayerScript
 {
 public:
@@ -209,5 +207,4 @@ public:
 void AddSC_LearnAllSpells()
 {
     new LearnSpellsOnLevelUp();
-
 }
