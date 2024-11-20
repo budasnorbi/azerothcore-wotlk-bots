@@ -152,6 +152,10 @@ function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
         local spell = spr[i]
         if not player:HasSpell(spell) then
             player:LearnSpell(spell)
+            if(spell == 34428) then
+                player:LearnSpell(32215)
+                player:LearnSpell(32216)
+            end
             player:LearnSpellRanks(spell)
         end
     end
@@ -183,6 +187,10 @@ function MyHandlers.LearnTalent(player, tar, clientSecret)
         local spell = tar[i]
         if not player:HasSpell(spell) then
             player:LearnSpell(spell)
+            if(spell == 34428) then
+                player:LearnSpell(32215)
+                player:LearnSpell(32216)
+            end
         end
     end
 
@@ -229,6 +237,10 @@ function MyHandlers.WipeAll(player, clientSecret)
         local spell=tpells[guid][i]
         if player:HasSpell(spell) then
             player:RemoveSpell(spell)
+            if(spell == 34428) then
+                player:RemoveSpell(32215)
+                player:RemoveSpell(32216)
+            end
             copiedTpells[i] = spell
         end
     end
