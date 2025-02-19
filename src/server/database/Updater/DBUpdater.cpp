@@ -20,10 +20,10 @@
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
-#include "GitRevision.h"
 #include "Log.h"
 #include "StartProcess.h"
 #include "UpdateFetcher.h"
+#include "QueryResult.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -200,7 +200,7 @@ std::string DBUpdater<PlayerbotsDatabaseConnection>::GetSourceDirectory()
 template<>
 std::string DBUpdater<PlayerbotsDatabaseConnection>::GetBaseFilesDirectory()
 {
-    return DBUpdater<PlayerbotsDatabaseConnection>::GetSourceDirectory() + "/sql/playerbots/base/";
+    return DBUpdater<PlayerbotsDatabaseConnection>::GetSourceDirectory() + "/data/sql/playerbots/base/";
 }
 
 template<>

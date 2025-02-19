@@ -15,8 +15,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "AsyncAuctionListing.h"
 #include "AuctionHouseMgr.h"
+#include "AuctionHouseSearcher.h"
 #include "Chat.h"
 #include "GameTime.h"
 #include "Language.h"
@@ -25,18 +25,17 @@
 #include "Opcodes.h"
 #include "Player.h"
 #include "ScriptMgr.h"
-#include "UpdateMask.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
- //void called when player click on auctioneer npc
-void WorldSession::HandleAuctionHelloOpcode(WorldPacket& recvData)
+// void called when player click on auctioneer npc
+void WorldSession::HandleAuctionHelloOpcode(WorldPacket &recvData)
 {
-    ObjectGuid guid;                                            //NPC guid
+    ObjectGuid guid; // NPC guid
     recvData >> guid;
 
-    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
+    Creature *unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
     if (!unit)
     {
         LOG_DEBUG("network", "WORLD: HandleAuctionHelloOpcode - Unit ({}) not found or you can't interact with him.", guid.ToString());
@@ -50,8 +49,8 @@ void WorldSession::HandleAuctionHelloOpcode(WorldPacket& recvData)
     SendAuctionHello(guid, unit);
 }
 
-//this void causes that auction window is opened
-void WorldSession::SendAuctionHello(ObjectGuid guid, Creature* unit)
+// this void causes that auction window is opened
+void WorldSession::SendAuctionHello(ObjectGuid guid, Creature *unit)
 {
     if (GetPlayer()->GetLevel() < sWorld->getIntConfig(CONFIG_AUCTION_LEVEL_REQ))
     {
@@ -62,18 +61,18 @@ void WorldSession::SendAuctionHello(ObjectGuid guid, Creature* unit)
     if (!sScriptMgr->CanSendAuctionHello(this, guid, unit))
         return;
 
-    AuctionHouseEntry const* ahEntry = AuctionHouseMgr::GetAuctionHouseEntry(unit->GetFaction());
+    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(unit->GetFaction());
     if (!ahEntry)
         return;
 
     WorldPacket data(MSG_AUCTION_HELLO, 12);
     data << guid;
     data << uint32(ahEntry->houseId);
-    data << uint8(1);                                       // 3.3.3: 1 - AH enabled, 0 - AH disabled
+    data << uint8(1); // 3.3.3: 1 - AH enabled, 0 - AH disabled
     SendPacket(&data);
 }
 
-//call this method when player bids, creates, or deletes auction
+// call this method when player bids, creates, or deletes auction
 void WorldSession::SendAuctionCommandResult(uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError)
 {
     WorldPacket data(SMSG_AUCTION_COMMAND_RESULT, 16);
@@ -81,11 +80,11 @@ void WorldSession::SendAuctionCommandResult(uint32 auctionId, uint32 Action, uin
     data << Action;
     data << ErrorCode;
     if (!ErrorCode && Action)
-        data << bidError;                                   //when bid, then send 0, once...
+        data << bidError; // when bid, then send 0, once...
     SendPacket(&data);
 }
 
-//this function sends notification, if bidder is online
+// this function sends notification, if bidder is online
 void WorldSession::SendAuctionBidderNotification(uint32 location, uint32 auctionId, ObjectGuid bidder, uint32 bidSum, uint32 diff, uint32 item_template)
 {
     WorldPacket data(SMSG_AUCTION_BIDDER_NOTIFICATION, (8 * 4));
@@ -99,22 +98,22 @@ void WorldSession::SendAuctionBidderNotification(uint32 location, uint32 auction
     SendPacket(&data);
 }
 
-//this void causes on client to display: "Your auction sold"
-void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
+// this void causes on client to display: "Your auction sold"
+void WorldSession::SendAuctionOwnerNotification(AuctionEntry *auction)
 {
     WorldPacket data(SMSG_AUCTION_OWNER_NOTIFICATION, (8 * 4));
     data << uint32(auction->Id);
     data << uint32(auction->bid);
-    data << uint32(0);                                      //unk
-    data << uint64(0);                                      //unk (bidder guid?)
+    data << uint32(0); // unk
+    data << uint64(0); // unk (bidder guid?)
     data << uint32(auction->item_template);
-    data << uint32(0);                                      //unk
-    data << float(0);                                       //unk (time?)
+    data << uint32(0); // unk
+    data << float(0);  // unk (time?)
     SendPacket(&data);
 }
 
-//this void creates new auction and adds auction to some auctionhouse
-void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
+// this void creates new auction and adds auction to some auctionhouse
+void WorldSession::HandleAuctionSellItem(WorldPacket &recvData)
 {
     ObjectGuid auctioneer;
     uint32 itemsCount, etime, bid, buyout;
@@ -154,13 +153,12 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
     if (bid > MAX_MONEY_AMOUNT || buyout > MAX_MONEY_AMOUNT)
     {
         LOG_DEBUG("network", "WORLD: HandleAuctionSellItem - Player {} ({}) attempted to sell item with higher price than max gold amount.",
-            _player->GetName(), _player->GetGUID().ToString());
+                  _player->GetName(), _player->GetGUID().ToString());
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
         return;
     }
 
-
-    AuctionHouseEntry const* auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntry(GetPlayer()->GetFaction());
+    AuctionHouseEntry const *auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
     if (!auctionHouseEntry)
     {
         LOG_DEBUG("network", "WORLD: HandleAuctionSellItem - Unit ({}) has wrong faction.", auctioneer.ToString());
@@ -182,14 +180,14 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Item* items[MAX_AUCTION_ITEMS];
+    Item *items[MAX_AUCTION_ITEMS];
 
     uint32 finalCount = 0;
     uint32 itemEntry = 0;
 
     for (uint32 i = 0; i < itemsCount; ++i)
     {
-        Item* item = _player->GetItemByGuid(itemGUIDs[i]);
+        Item *item = _player->GetItemByGuid(itemGUIDs[i]);
 
         if (!item)
         {
@@ -201,8 +199,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
             itemEntry = item->GetTemplate()->ItemId;
 
         if (sAuctionMgr->GetAItem(item->GetGUID()) || !item->CanBeTraded() || item->IsNotEmptyBag() ||
-                item->GetTemplate()->HasFlag(ITEM_FLAG_CONJURED) || item->GetUInt32Value(ITEM_FIELD_DURATION) ||
-                item->GetCount() < count[i] || itemEntry != item->GetTemplate()->ItemId)
+            item->GetTemplate()->HasFlag(ITEM_FLAG_CONJURED) || item->GetUInt32Value(ITEM_FIELD_DURATION) ||
+            item->GetCount() < count[i] || itemEntry != item->GetTemplate()->ItemId)
         {
             SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
             return;
@@ -233,7 +231,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
     for (uint32 i = 0; i < itemsCount; ++i)
     {
-        Item* item = items[i];
+        Item *item = items[i];
 
         if (item->GetMaxStackCount() < finalCount)
         {
@@ -244,10 +242,10 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
     for (uint32 i = 0; i < itemsCount; ++i)
     {
-        Item* item = items[i];
+        Item *item = items[i];
 
         uint32 auctionTime = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));
-        AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
+        AuctionHouseObject *auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
 
         uint32 deposit = sAuctionMgr->GetAuctionDeposit(auctionHouseEntry, etime, item, finalCount);
         if (!_player->HasEnoughMoney(deposit))
@@ -258,15 +256,31 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
         _player->ModifyMoney(-int32(deposit));
 
-        AuctionEntry* AH = new AuctionEntry;
+        AuctionEntry *AH = new AuctionEntry;
         AH->Id = sObjectMgr->GenerateAuctionID();
 
         if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
-            AH->houseId = AUCTIONHOUSE_NEUTRAL;
+            AH->houseId = AuctionHouseId::Neutral;
         else
         {
+            CreatureData const *auctioneerData = sObjectMgr->GetCreatureData(creature->GetSpawnId());
+            if (!auctioneerData)
+            {
+                LOG_ERROR("network.opcode", "Data for auctioneer not found ({})", auctioneer.ToString());
+                delete AH;
+                return;
+            }
 
-            AH->houseId = GetPlayer()->GetTeamId() == TEAM_ALLIANCE ? 2 : 6;
+            CreatureTemplate const *auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id1);
+            if (!auctioneerInfo)
+            {
+                LOG_ERROR("network.opcode", "Non existing auctioneer ({})", auctioneer.ToString());
+                delete AH;
+                return;
+            }
+
+            const AuctionHouseEntry *AHEntry = sAuctionMgr->GetAuctionHouseEntryFromFactionTemplate(auctioneerInfo->faction);
+            AH->houseId = AuctionHouseId(AHEntry->houseId);
         }
 
         // Required stack size of auction matches to current item stack size, just move item to auctionhouse
@@ -285,7 +299,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
             AH->auctionHouseEntry = auctionHouseEntry;
 
             LOG_DEBUG("network.opcode", "CMSG_AUCTION_SELL_ITEM: Player {} ({}) is selling item {} entry {} ({}) with count {} with initial bid {} with buyout {} and with time {} (in sec) in auctionhouse {}",
-                _player->GetName(), _player->GetGUID().ToString(), item->GetTemplate()->Name1, item->GetEntry(), item->GetGUID().ToString(), item->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
+                      _player->GetName(), _player->GetGUID().ToString(), item->GetTemplate()->Name1, item->GetEntry(), item->GetGUID().ToString(), item->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
             sAuctionMgr->AddAItem(item);
             auctionHouse->AddAuction(AH);
 
@@ -305,7 +319,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
         }
         else // Required stack size of auction does not match to current item stack size, clone item and set correct stack size
         {
-            Item* newItem = item->CloneItem(finalCount, _player);
+            Item *newItem = item->CloneItem(finalCount, _player);
             if (!newItem)
             {
                 LOG_ERROR("network.opcode", "CMSG_AUCTION_SELL_ITEM: Could not create clone of item {}", item->GetEntry());
@@ -326,13 +340,13 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
             AH->auctionHouseEntry = auctionHouseEntry;
 
             LOG_DEBUG("network.opcode", "CMSG_AUCTION_SELL_ITEM: Player {} ({}) is selling item {} entry {} ({}) with count {} with initial bid {} with buyout {} and with time {} (in sec) in auctionhouse {}",
-                _player->GetName(), _player->GetGUID().ToString(), newItem->GetTemplate()->Name1, newItem->GetEntry(), newItem->GetGUID().ToString(), newItem->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
+                      _player->GetName(), _player->GetGUID().ToString(), newItem->GetTemplate()->Name1, newItem->GetEntry(), newItem->GetGUID().ToString(), newItem->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
             sAuctionMgr->AddAItem(newItem);
             auctionHouse->AddAuction(AH);
 
             for (uint32 j = 0; j < itemsCount; ++j)
             {
-                Item* item2 = items[j];
+                Item *item2 = items[j];
 
                 // Item stack count equals required count, ready to delete item - cloned item will be used for auction
                 if (item2->GetCount() == count[j])
@@ -368,8 +382,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
     }
 }
 
-//this function is called when client bids or buys out auction
-void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
+// this function is called when client bids or buys out auction
+void WorldSession::HandleAuctionPlaceBid(WorldPacket &recvData)
 {
     ObjectGuid auctioneer;
     uint32 auctionId;
@@ -378,17 +392,16 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
     recvData >> auctionId >> price;
 
     if (!auctionId || !price)
-        return;                                             //check for cheaters
-
+        return; // check for cheaters
 
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
+    AuctionHouseObject *auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
 
-    AuctionEntry* auction = auctionHouse->GetAuction(auctionId);
-    Player* player = GetPlayer();
+    AuctionEntry *auction = auctionHouse->GetAuction(auctionId);
+    Player *player = GetPlayer();
 
     if (!sScriptMgr->CanPlaceAuctionBid(player, auction))
     {
@@ -398,16 +411,16 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 
     if (!auction || auction->owner == player->GetGUID())
     {
-        //you cannot bid your own auction:
+        // you cannot bid your own auction:
         SendAuctionCommandResult(0, AUCTION_PLACE_BID, ERR_AUCTION_BID_OWN);
         return;
     }
 
     // impossible have online own another character (use this for speedup check in case online owner)
-    Player* auction_owner = ObjectAccessor::FindConnectedPlayer(auction->owner);
+    Player *auction_owner = ObjectAccessor::FindConnectedPlayer(auction->owner);
     if (!auction_owner && sCharacterCache->GetCharacterAccountIdByGuid(auction->owner) == GetAccountId())
     {
-        //you cannot bid your another character auction:
+        // you cannot bid your another character auction:
         SendAuctionCommandResult(0, AUCTION_PLACE_BID, ERR_AUCTION_BID_OWN);
         return;
     }
@@ -418,16 +431,16 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 
     // price too low for next bid if not buyout
     if ((price < auction->buyout || auction->buyout == 0) &&
-        price < auction->bid + auction->GetAuctionOutBid())
+        price < auction->bid + AuctionEntry::CalculateAuctionOutBid(auction->bid))
     {
-        //auction has already higher bid, client tests it!
+        // auction has already higher bid, client tests it!
         return;
     }
 
     if (!player->HasEnoughMoney(price))
     {
-        //you don't have enought money!, client tests!
-        //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
+        // you don't have enought money!, client tests!
+        // SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
         return;
     }
 
@@ -451,9 +464,12 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
 
         auction->bidder = player->GetGUID();
         auction->bid = price;
+
+        sAuctionMgr->GetAuctionHouseSearcher()->UpdateBid(auction);
+
         GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, price);
 
-        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_AUCTION_BID);
+        CharacterDatabasePreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_AUCTION_BID);
         stmt->SetData(0, auction->bidder.GetCounter());
         stmt->SetData(1, auction->bid);
         stmt->SetData(2, auction->Id);
@@ -463,13 +479,13 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
     }
     else
     {
-        //buyout:
+        // buyout:
         if (player->GetGUID() == auction->bidder)
             player->ModifyMoney(-int32(auction->buyout - auction->bid));
         else
         {
             player->ModifyMoney(-int32(auction->buyout));
-            if (auction->bidder)                          //buyout for bidded auction ..
+            if (auction->bidder) // buyout for bidded auction ..
                 sAuctionMgr->SendAuctionOutbiddedMail(auction, auction->buyout, GetPlayer(), trans);
         }
         auction->bidder = player->GetGUID();
@@ -493,8 +509,8 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
     CharacterDatabase.CommitTransaction(trans);
 }
 
-//this void is called when auction_owner cancels his auction
-void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
+// this void is called when auction_owner cancels his auction
+void WorldSession::HandleAuctionRemoveItem(WorldPacket &recvData)
 {
     ObjectGuid auctioneer;
     uint32 auctionId;
@@ -505,48 +521,42 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
+    AuctionHouseObject *auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
 
-    AuctionEntry* auction = auctionHouse->GetAuction(auctionId);
-    Player* player = GetPlayer();
+    AuctionEntry *auction = auctionHouse->GetAuction(auctionId);
+    Player *player = GetPlayer();
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
     if (auction && auction->owner == player->GetGUID())
     {
-        Item* pItem = sAuctionMgr->GetAItem(auction->item_guid);
-        if (pItem)
-        {
-            if (auction->bidder)                        // If we have a bidder, we have to send him the money he paid
-            {
-                uint32 auctionCut = auction->GetAuctionCut();
-                if (!player->HasEnoughMoney(auctionCut))          //player doesn't have enough money, maybe message needed
-                    return;
-                //some auctionBidderNotification would be needed, but don't know that parts..
-                sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans);
-                player->ModifyMoney(-int32(auctionCut));
-            }
-
-            // item will deleted or added to received mail list
-            MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(ObjectGuid::Empty, 0, auction->buyout, auction->deposit))
-                .AddItem(pItem)
-                .SendMailTo(trans, player, auction, MAIL_CHECK_MASK_COPIED);
-        }
-        else
-        {
-            LOG_ERROR("network.opcode", "Auction id: {} has non-existed item (item: {})!!!", auction->Id, auction->item_guid.ToString());
-            SendAuctionCommandResult(0, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
+        Item *pItem = sAuctionMgr->GetAItem(auction->item_guid);
+        if (!pItem)
             return;
+
+        if (auction->bidder) // If we have a bidder, we have to send him the money he paid
+        {
+            uint32 auctionCut = auction->GetAuctionCut();
+            if (!player->HasEnoughMoney(auctionCut)) // player doesn't have enough money, maybe message needed
+                return;
+            // some auctionBidderNotification would be needed, but don't know that parts..
+            sAuctionMgr->SendAuctionCancelledToBidderMail(auction, trans);
+            player->ModifyMoney(-int32(auctionCut));
         }
+
+        // item will deleted or added to received mail list
+        MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(ObjectGuid::Empty, 0, auction->buyout, auction->deposit))
+            .AddItem(pItem)
+            .SendMailTo(trans, player, auction, MAIL_CHECK_MASK_COPIED);
     }
     else
     {
         SendAuctionCommandResult(0, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
-        //this code isn't possible ... maybe there should be assert
+        // this code isn't possible ... maybe there should be assert
         LOG_ERROR("network.opcode", "CHEATER : {}, he tried to cancel auction (id: {}) of another player, or auction is nullptr", player->GetGUID().ToString(), auctionId);
         return;
     }
 
-    //inform player, that auction is removed
+    // inform player, that auction is removed
     SendAuctionCommandResult(auction->Id, AUCTION_CANCEL, ERR_AUCTION_OK);
 
     // Now remove the auction
@@ -559,15 +569,15 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recvData)
     auctionHouse->RemoveAuction(auction);
 }
 
-//called when player lists his bids
-void WorldSession::HandleAuctionListBidderItems(WorldPacket& recvData)
+// called when player lists his bids
+void WorldSession::HandleAuctionListBidderItems(WorldPacket &recvData)
 {
-    ObjectGuid guid;                                            //NPC guid
-    uint32 listfrom;                                        //page of auctions
-    uint32 outbiddedCount;                                  //count of outbidded auctions
+    ObjectGuid guid;       // NPC guid
+    uint32 listfrom;       // page of auctions
+    uint32 outbiddedCount; // count of outbidded auctions
 
     recvData >> guid;
-    recvData >> listfrom;                                  // not used in fact (this list not have page control in client)
+    recvData >> listfrom; // not used in fact (this list not have page control in client)
     recvData >> outbiddedCount;
     if (recvData.size() != (16 + outbiddedCount * 4))
     {
@@ -575,86 +585,70 @@ void WorldSession::HandleAuctionListBidderItems(WorldPacket& recvData)
         outbiddedCount = 0;
     }
 
+    Creature *creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
+    if (!creature)
+    {
+        LOG_DEBUG("network", "WORLD: HandleAuctionListBidderItems - Unit ({}) not found or you can't interact with him.", guid.ToString());
+        recvData.rfinish();
+        return;
+    }
+
+    // Arbitrary cap, can be adjusted if needed
+    if (outbiddedCount > 1000)
+        return;
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
+    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+    if (!ahEntry)
+        return;
 
-    WorldPacket data(SMSG_AUCTION_BIDDER_LIST_RESULT, (4 + 4 + 4) + 30000); // pussywizard: ensure there is enough memory
-    Player* player = GetPlayer();
-    data << (uint32)0;                                     //add 0 as count
-    uint32 count = 0;
-    uint32 totalcount = 0;
-    while (outbiddedCount > 0)                             //add all data, which client requires
+    AuctionHouseFaction auctionHouseFaction = AuctionHouseMgr::GetAuctionHouseFactionFromHouseId(AuctionHouseId(ahEntry->houseId));
+
+    // Client sends this list, which I'm honestly not entirely sure why?
+    std::vector<uint32> auctionIds;
+    auctionIds.reserve(outbiddedCount);
+    while (outbiddedCount > 0) // add all data, which client requires
     {
         --outbiddedCount;
         uint32 outbiddedAuctionId;
         recvData >> outbiddedAuctionId;
-        AuctionEntry* auction = auctionHouse->GetAuction(outbiddedAuctionId);
-        if (auction && auction->BuildAuctionInfo(data))
-        {
-            ++totalcount;
-            ++count;
-        }
+        auctionIds.push_back(outbiddedAuctionId);
     }
 
-    auctionHouse->BuildListBidderItems(data, player, count, totalcount);
-    data.put<uint32>(0, count);                           // add count to placeholder
-    data << totalcount;
-    data << (uint32)300;                                    //unk 2.3.0
-    SendPacket(&data);
+    sAuctionMgr->GetAuctionHouseSearcher()->QueueSearchRequest(new AuctionSearchBidderListRequest(auctionHouseFaction, std::move(auctionIds), GetPlayer()->GetGUID()));
 }
 
-//this void sends player info about his auctions
-void WorldSession::HandleAuctionListOwnerItems(WorldPacket& recvData)
+// this void sends player info about his auctions
+void WorldSession::HandleAuctionListOwnerItems(WorldPacket &recvData)
 {
-    // prevent crash caused by malformed packet
     ObjectGuid guid;
     uint32 listfrom;
 
     recvData >> guid;
-    recvData >> listfrom;       // not used in fact (this list does not have page control in client)
+    recvData >> listfrom; // not used in fact (this list does not have page control in client)
 
-    // pussywizard:
-    const Milliseconds now = GameTime::GetGameTimeMS();
-    if (_lastAuctionListOwnerItemsMSTime > now) // list is pending
+    Creature *creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
+    if (!creature)
         return;
-
-    const Milliseconds delay = Milliseconds(4500);
-    Milliseconds diff = GetMSTimeDiff(_lastAuctionListOwnerItemsMSTime, now);
-    if (diff > delay)
-        diff = delay;
-
-    _lastAuctionListOwnerItemsMSTime = now + delay; // set longest possible here, actual executing will change this to getMSTime of that moment
-    _player->m_Events.AddEvent(new AuctionListOwnerItemsDelayEvent(guid, _player->GetGUID()), _player->m_Events.CalculateTime(delay.count() - diff.count()));
-}
-
-void WorldSession::HandleAuctionListOwnerItemsEvent(ObjectGuid creatureGuid)
-{
-    _lastAuctionListOwnerItemsMSTime = GameTime::GetGameTimeMS(); // pussywizard
 
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(GetPlayer()->GetFaction());
+    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+    if (!ahEntry)
+        return;
 
-    WorldPacket data(SMSG_AUCTION_OWNER_LIST_RESULT, (4 + 4 + 4) + 60000); // pussywizard: ensure there is enough memory
-    data << (uint32)0;                                     // amount place holder
+    AuctionHouseFaction auctionHouseFaction = AuctionHouseMgr::GetAuctionHouseFactionFromHouseId(AuctionHouseId(ahEntry->houseId));
 
-    uint32 count = 0;
-    uint32 totalcount = 0;
-
-    auctionHouse->BuildListOwnerItems(data, _player, count, totalcount);
-    data.put<uint32>(0, count);
-    data << (uint32)totalcount;
-    data << (uint32)0;
-    SendPacket(&data);
+    sAuctionMgr->GetAuctionHouseSearcher()->QueueSearchRequest(new AuctionSearchOwnerListRequest(auctionHouseFaction, GetPlayer()->GetGUID()));
 }
 
-//this void is called when player clicks on search button
-void WorldSession::HandleAuctionListItems(WorldPacket& recvData)
+// this void is called when player clicks on search button
+void WorldSession::HandleAuctionListItems(WorldPacket &recvData)
 {
     std::string searchedname;
     uint8 levelmin, levelmax, usable;
@@ -662,20 +656,23 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recvData)
     ObjectGuid guid;
 
     recvData >> guid;
-    recvData >> listfrom;                                  // start, used for page control listing by 50 elements
+    recvData >> listfrom; // start, used for page control listing by 50 elements
     recvData >> searchedname;
 
     recvData >> levelmin >> levelmax;
     recvData >> auctionSlotID >> auctionMainCategory >> auctionSubCategory;
     recvData >> quality >> usable;
 
-    //recvData.read_skip<uint8>(); // pussywizard: this is the getAll option
     uint8 getAll;
     recvData >> getAll;
 
     // Read sort block
     uint8 sortOrderCount;
     recvData >> sortOrderCount;
+
+    if (sortOrderCount > AUCTION_SORT_MAX)
+        return;
+
     AuctionSortOrderVector sortOrder;
     for (uint8 i = 0; i < sortOrderCount; i++)
     {
@@ -689,34 +686,76 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recvData)
         sortOrder.push_back(std::move(sortInfo));
     }
 
+    // converting string that we try to find to lower case
+    std::wstring wsearchedname;
+    if (!Utf8toWStr(searchedname, wsearchedname))
+        return;
+
+    wstrToLower(wsearchedname);
+
+    Creature *creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
+    if (!creature)
+        return;
+
     // remove fake death
     if (_player->HasUnitState(UNIT_STATE_DIED))
-    {
         _player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+
+    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+    if (!ahEntry)
+        return;
+
+    AuctionHouseFaction auctionHouseFaction = AuctionHouseMgr::GetAuctionHouseFactionFromHouseId(AuctionHouseId(ahEntry->houseId));
+
+    AuctionHouseSearchInfo ahSearchInfo;
+    ahSearchInfo.wsearchedname = wsearchedname;
+    ahSearchInfo.listfrom = listfrom;
+    ahSearchInfo.levelmin = levelmin;
+    ahSearchInfo.levelmax = levelmax;
+    ahSearchInfo.usable = usable;
+    ahSearchInfo.inventoryType = auctionSlotID;
+    ahSearchInfo.itemClass = auctionMainCategory;
+    ahSearchInfo.itemSubClass = auctionSubCategory;
+    ahSearchInfo.quality = quality;
+    ahSearchInfo.getAll = getAll;
+    ahSearchInfo.sorting = std::move(sortOrder);
+
+    AuctionHousePlayerInfo ahPlayerInfo;
+    ahPlayerInfo.playerGuid = GetPlayer()->GetGUID();
+    ahPlayerInfo.faction = GetPlayer()->GetFaction();
+    ahPlayerInfo.loc_idx = GetPlayer()->GetSession()->GetSessionDbLocaleIndex();
+    ahPlayerInfo.locdbc_idx = GetPlayer()->GetSession()->GetSessionDbcLocale();
+    if (usable)
+    {
+        AuctionHouseUsablePlayerInfo usablePlayerInfo;
+        usablePlayerInfo.classMask = GetPlayer()->getClassMask();
+        usablePlayerInfo.raceMask = GetPlayer()->getRaceMask();
+        usablePlayerInfo.level = GetPlayer()->GetLevel();
+
+        SkillStatusMap const &skillMap = GetPlayer()->GetSkillStatusMap();
+        for (auto const &pair : skillMap)
+            usablePlayerInfo.skills.insert(std::make_pair(pair.first, GetPlayer()->GetSkillValue(pair.first)));
+
+        PlayerSpellMap const &spellMap = GetPlayer()->GetSpellMap();
+        for (auto const &pair : spellMap)
+        {
+            if (pair.second->State != PLAYERSPELL_REMOVED && pair.second->IsInSpec(GetPlayer()->GetActiveSpec()))
+                usablePlayerInfo.spells.insert(pair.first);
+        }
+        ahPlayerInfo.usablePlayerInfo = std::move(usablePlayerInfo);
     }
 
-    // pussywizard:
-    const Milliseconds delay = 2s;
-    const Milliseconds now = GameTime::GetGameTimeMS();
-    Milliseconds diff = GetMSTimeDiff(_lastAuctionListItemsMSTime, now);
-    if (diff > delay)
-    {
-        diff = delay;
-    }
-    _lastAuctionListItemsMSTime = now + delay - diff;
-    std::lock_guard<std::mutex> guard(AsyncAuctionListingMgr::GetTempLock());
-    AsyncAuctionListingMgr::GetTempList().emplace_back(delay - diff, _player->GetGUID(), guid, searchedname, listfrom, levelmin, levelmax, usable, auctionSlotID,
-        auctionMainCategory, auctionSubCategory, quality, getAll, sortOrder);
+    sAuctionMgr->GetAuctionHouseSearcher()->QueueSearchRequest(new AuctionSearchListRequest(auctionHouseFaction, std::move(ahSearchInfo), std::move(ahPlayerInfo)));
 }
 
-void WorldSession::HandleAuctionListPendingSales(WorldPacket& recvData)
+void WorldSession::HandleAuctionListPendingSales(WorldPacket &recvData)
 {
     recvData.read_skip<uint64>();
 
     uint32 count = 0;
 
     WorldPacket data(SMSG_AUCTION_LIST_PENDING_SALES, 4);
-    data << uint32(count);                                  // count
+    data << uint32(count); // count
     /*for (uint32 i = 0; i < count; ++i)
     {
         data << "";                                         // string

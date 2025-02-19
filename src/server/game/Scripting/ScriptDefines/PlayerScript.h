@@ -19,6 +19,7 @@
 #define SCRIPT_OBJECT_PLAYER_SCRIPT_H_
 
 #include "ScriptObject.h"
+#include "SharedDefines.h"
 #include <vector>
 
 // TODO to remove
@@ -149,6 +150,7 @@ enum PlayerHook
     PLAYERHOOK_ON_CUSTOM_SCALING_STAT_VALUE,
     PLAYERHOOK_ON_APPLY_ITEM_MODS_BEFORE,
     PLAYERHOOK_ON_APPLY_ENCHANTMENT_ITEM_MODS_BEFORE,
+    PLAYERHOOK_ON_APPLY_WEAPON_DAMAGE,
     PLAYERHOOK_CAN_ARMOR_DAMAGE_MODIFIER,
     PLAYERHOOK_ON_GET_FERAL_AP_BONUS,
     PLAYERHOOK_CAN_APPLY_WEAPON_DEPENDENT_AURA_DAMAGE_MOD,
@@ -202,6 +204,7 @@ enum PlayerHook
     PLAYERHOOK_CAN_SEND_ERROR_ALREADY_LOOTED,
     PLAYERHOOK_ON_AFTER_CREATURE_LOOT,
     PLAYERHOOK_ON_AFTER_CREATURE_LOOT_MONEY,
+    PLAYERHOOK_CAN_RESURRECT,
     PLAYERHOOK_END
 };
 
@@ -547,6 +550,8 @@ public:
 
     virtual void OnApplyEnchantmentItemModsBefore(Player* /*player*/, Item* /*item*/, EnchantmentSlot /*slot*/, bool /*apply*/, uint32 /*enchant_spell_id*/, uint32& /*enchant_amount*/) { }
 
+    virtual void OnApplyWeaponDamage(Player* /*player*/, uint8 /*slot*/, ItemTemplate const* /*proto*/, float& /*minDamage*/, float& /*maxDamage*/, uint8 /*damageIndex*/) { }
+
     [[nodiscard]] virtual bool CanArmorDamageModifier(Player* /*player*/) { return true; }
 
     virtual void OnGetFeralApBonus(Player* /*player*/, int32& /*feral_bonus*/, int32 /*dpsMod*/, ItemTemplate const* /*proto*/, ScalingStatValuesEntry const* /*ssv*/) { }
@@ -762,6 +767,15 @@ public:
      * @param player Contains information about the Player
      */
     virtual void OnAfterCreatureLootMoney(Player* /*player*/) { }
+
+    /**
+     * @brief This hook is called, to avoid player resurrect
+     *
+     * @param player Contains information about the Player
+     *
+     * @return true if player is authorized to resurect
+     */
+    virtual bool CanPlayerResurrect(Player* /*player*/) { return true; }
 };
 
 #endif

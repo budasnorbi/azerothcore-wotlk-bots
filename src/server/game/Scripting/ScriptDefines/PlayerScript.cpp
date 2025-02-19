@@ -652,6 +652,11 @@ void ScriptMgr::OnApplyEnchantmentItemModsBefore(Player* player, Item* item, Enc
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_APPLY_ENCHANTMENT_ITEM_MODS_BEFORE, script->OnApplyEnchantmentItemModsBefore(player, item, slot, apply, enchant_spell_id, enchant_amount));
 }
 
+void ScriptMgr::OnApplyWeaponDamage(Player* player, uint8 slot, ItemTemplate const* proto, float& minDamage, float& maxDamage, uint8 damageIndex)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_APPLY_WEAPON_DAMAGE, script->OnApplyWeaponDamage(player, slot, proto, minDamage, maxDamage, damageIndex));
+}
+
 bool ScriptMgr::CanArmorDamageModifier(Player* player)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_ARMOR_DAMAGE_MODIFIER, !script->CanArmorDamageModifier(player));
@@ -896,6 +901,11 @@ bool ScriptMgr::AnticheatHandleDoubleJump(Player* player, Unit* mover)
 bool ScriptMgr::AnticheatCheckMovementInfo(Player* player, MovementInfo const& movementInfo, Unit* mover, bool jump)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_ANTICHEAT_CHECK_MOVEMENT_INFO, !script->AnticheatCheckMovementInfo(player, movementInfo, mover, jump));
+}
+
+bool ScriptMgr::CanPlayerResurrect(Player* player)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_RESURRECT, !script->CanPlayerResurrect(player));
 }
 
 PlayerScript::PlayerScript(const char* name, std::vector<uint16> enabledHooks)

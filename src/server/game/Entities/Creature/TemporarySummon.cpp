@@ -274,6 +274,11 @@ void TempSummon::InitSummon()
     }
 }
 
+void TempSummon::UpdateObjectVisibilityOnCreate()
+{
+    WorldObject::UpdateObjectVisibility(true);
+}
+
 void TempSummon::SetTempSummonType(TempSummonType type)
 {
     m_type = type;
@@ -305,13 +310,9 @@ void TempSummon::UnSummon(uint32 msTime)
     if (WorldObject* owner = GetSummoner())
     {
         if (owner->IsCreature() && owner->ToCreature()->IsAIEnabled)
-        {
             owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
-        }
         else if (owner->IsGameObject() && owner->ToGameObject()->AI())
-        {
             owner->ToGameObject()->AI()->SummonedCreatureDespawn(this);
-        }
     }
 
     AddObjectToRemoveList();

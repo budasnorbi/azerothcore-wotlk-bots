@@ -25,7 +25,6 @@
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
-#include "UpdateData.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <cmath>
@@ -744,7 +743,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recvData)
         return;
     }
 
-    if ((creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_SELL_VENDOR) != 0)
+    if (creature->HasFlagsExtra(CREATURE_FLAG_EXTRA_NO_SELL_VENDOR))
     {
         _player->SendSellError(SELL_ERR_CANT_SELL_TO_THIS_MERCHANT, creature, itemguid, 0);
         return;
