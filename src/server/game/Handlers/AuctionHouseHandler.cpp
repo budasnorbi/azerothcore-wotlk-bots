@@ -158,12 +158,20 @@ void WorldSession::HandleAuctionSellItem(WorldPacket &recvData)
         return;
     }
 
-    AuctionHouseEntry const *auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(auctioneer, UNIT_NPC_FLAG_AUCTIONEER);
+    if (!creature)
+    {
+        LOG_DEBUG("network", "WORLD: HandleAuctionSellItem - Unit ({}) not found or you can't interact with him.", auctioneer.ToString());
+        return;
+    }
+
+    AuctionHouseEntry const* auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
     if (!auctionHouseEntry)
     {
         LOG_DEBUG("network", "WORLD: HandleAuctionSellItem - Unit ({}) has wrong faction.", auctioneer.ToString());
         return;
     }
+
 
     etime *= MINUTE;
 

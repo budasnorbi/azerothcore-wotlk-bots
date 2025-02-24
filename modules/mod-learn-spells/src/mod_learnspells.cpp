@@ -9,6 +9,47 @@
 
 using namespace std;
 
+enum class SPECS_SKILL_IDS
+{
+    //RUGO
+    ASSASSINATION = 253,
+    COMBAT = 38,
+    SUBTETLY = 39,
+    //HUNTER
+    SURVIVAL = 51,
+    BEAST_MASTERY = 50,
+    MARKSMANSHIP =163,
+    // SHAMAN
+    ENHANCEMENT = 373,
+    ELEMENTAL_COMBAT = 375,
+    RESTORATION_SHAMAN =374,
+    // PRIEST
+    HOLY_PRIEST = 56,
+    DISCIPLINE=613,
+    SHADOW = 78,
+    // PALADIN
+    RETRIBUTION = 184,
+    PROTECTION_PALADIN =267,
+    HOLY_PALADIN = 594,
+    // MAGE
+    FROST =6,
+    FIRE = 8,
+    ARCANE=237,
+    // WARLOCK
+    DEMONOLOGY = 354,
+    AFFLICTION =355,
+    DESTRUCTION =593,
+    // WARRIOR
+    PROTECTION_WARRIOR = 257,
+    FURY = 256,
+    ARMS = 26,
+    // DRUID
+    RESTORATION_DRUID =573,
+    BALANCE =574,
+    FERAL_COMBAT = 134,
+
+};
+
 enum class PROFFESSION_SKILL_IDS
 {
     BLACKSMITHING = 164,
@@ -27,7 +68,7 @@ enum class PROFFESSION_SKILL_IDS
     FIRST_AID = 129,
 };
 
-enum class PROFFESSION_SKILL_SPELLS
+enum class PROFFESSION_SPELL_IDS
 {
     BLACKSMITHING = 2018,
     LEATHERWORKING = 2108,
@@ -43,23 +84,6 @@ enum class PROFFESSION_SKILL_SPELLS
     COOKING = 2550,
     FIRST_AID = 3273,
     JEWELCRAFTING = 25229,
-};
-
-vector<pair<PROFFESSION_SKILL_IDS, PROFFESSION_SKILL_SPELLS>> autoLearnProfessions = {
-    {PROFFESSION_SKILL_IDS::BLACKSMITHING, PROFFESSION_SKILL_SPELLS::BLACKSMITHING},
-    {PROFFESSION_SKILL_IDS::LEATHERWORKING, PROFFESSION_SKILL_SPELLS::LEATHERWORKING},
-    {PROFFESSION_SKILL_IDS::ALCHEMY, PROFFESSION_SKILL_SPELLS::ALCHEMY},
-    {PROFFESSION_SKILL_IDS::HERBALISM, PROFFESSION_SKILL_SPELLS::HERBALISM},
-    {PROFFESSION_SKILL_IDS::MINING, PROFFESSION_SKILL_SPELLS::MINING},
-    {PROFFESSION_SKILL_IDS::TAILORING, PROFFESSION_SKILL_SPELLS::TAILORING},
-    {PROFFESSION_SKILL_IDS::ENGINEERING, PROFFESSION_SKILL_SPELLS::ENGINEERING},
-    {PROFFESSION_SKILL_IDS::ENCHANTING, PROFFESSION_SKILL_SPELLS::ENCHANTING},
-    {PROFFESSION_SKILL_IDS::SKINNING, PROFFESSION_SKILL_SPELLS::SKINNING},
-    {PROFFESSION_SKILL_IDS::JEWELCRAFTING, PROFFESSION_SKILL_SPELLS::JEWELCRAFTING},
-    {PROFFESSION_SKILL_IDS::INSCRIPTION, PROFFESSION_SKILL_SPELLS::INSCRIPTION},
-    {PROFFESSION_SKILL_IDS::FISHING, PROFFESSION_SKILL_SPELLS::FISHING},
-    {PROFFESSION_SKILL_IDS::COOKING, PROFFESSION_SKILL_SPELLS::COOKING},
-    {PROFFESSION_SKILL_IDS::FIRST_AID, PROFFESSION_SKILL_SPELLS::FIRST_AID},
 };
 
 enum class SKILL_IDS
@@ -86,6 +110,7 @@ enum class SKILL_IDS
     PLATE = 293,
     LEATHER = 414,
     CLOTH = 415,
+    DUAL_WIELD = 118
 };
 
 enum class SKILL_SPELL_IDS : uint32_t
@@ -123,7 +148,23 @@ enum class SKILL_SPELL_IDS : uint32_t
     PARRY = 3127,
     SHOOT = 5019,
     DODGE = 81,
-    TOTEM = 27763
+};
+
+vector<pair<PROFFESSION_SKILL_IDS, PROFFESSION_SPELL_IDS>> autoLearnProfessions = {
+    {PROFFESSION_SKILL_IDS::BLACKSMITHING, PROFFESSION_SPELL_IDS::BLACKSMITHING},
+    {PROFFESSION_SKILL_IDS::LEATHERWORKING, PROFFESSION_SPELL_IDS::LEATHERWORKING},
+    {PROFFESSION_SKILL_IDS::ALCHEMY, PROFFESSION_SPELL_IDS::ALCHEMY},
+    {PROFFESSION_SKILL_IDS::HERBALISM, PROFFESSION_SPELL_IDS::HERBALISM},
+    {PROFFESSION_SKILL_IDS::MINING, PROFFESSION_SPELL_IDS::MINING},
+    {PROFFESSION_SKILL_IDS::TAILORING, PROFFESSION_SPELL_IDS::TAILORING},
+    {PROFFESSION_SKILL_IDS::ENGINEERING, PROFFESSION_SPELL_IDS::ENGINEERING},
+    {PROFFESSION_SKILL_IDS::ENCHANTING, PROFFESSION_SPELL_IDS::ENCHANTING},
+    {PROFFESSION_SKILL_IDS::SKINNING, PROFFESSION_SPELL_IDS::SKINNING},
+    {PROFFESSION_SKILL_IDS::JEWELCRAFTING, PROFFESSION_SPELL_IDS::JEWELCRAFTING},
+    {PROFFESSION_SKILL_IDS::INSCRIPTION, PROFFESSION_SPELL_IDS::INSCRIPTION},
+    {PROFFESSION_SKILL_IDS::FISHING, PROFFESSION_SPELL_IDS::FISHING},
+    {PROFFESSION_SKILL_IDS::COOKING, PROFFESSION_SPELL_IDS::COOKING},
+    {PROFFESSION_SKILL_IDS::FIRST_AID, PROFFESSION_SPELL_IDS::FIRST_AID},
 };
 
 vector<pair<SKILL_IDS, SKILL_SPELL_IDS>> autoLearnSkills = {
@@ -149,62 +190,83 @@ vector<pair<SKILL_IDS, SKILL_SPELL_IDS>> autoLearnSkills = {
     {SKILL_IDS::PLATE, SKILL_SPELL_IDS::PLATE},
     {SKILL_IDS::LEATHER, SKILL_SPELL_IDS::LEATHER},
     {SKILL_IDS::CLOTH, SKILL_SPELL_IDS::CLOTH},
-
+    {SKILL_IDS::DUAL_WIELD, SKILL_SPELL_IDS::DUAL_WIELD}
 };
 
-enum DUNGEONS_INSTANCES
-{
-    THE_DEADMINES = 36,
-    RAGEFIRE_CHASM = 389,
-    WAILING_CAVERNS = 43,
-    SHADOWFANG_KEEP = 33,
-    BLACKFATHOM_DEEPS = 48,
-    THE_STOCKADE = 34,
-    GNOMEREGAN = 90,
-    RAZORFEN_KRAUL = 47,
-    SCARLET_MONASTERY = 189,
+vector<SPECS_SKILL_IDS> classSpecs = {
+    //RUGO
+    SPECS_SKILL_IDS::ASSASSINATION,
+    SPECS_SKILL_IDS::COMBAT,
+    SPECS_SKILL_IDS::SUBTETLY,
+    //HUNTER
+    SPECS_SKILL_IDS::SURVIVAL,
+    SPECS_SKILL_IDS::BEAST_MASTERY,
+    SPECS_SKILL_IDS::MARKSMANSHIP,
+    //SHAMAN
+    SPECS_SKILL_IDS::ENHANCEMENT,
+    SPECS_SKILL_IDS::ELEMENTAL_COMBAT,
+    SPECS_SKILL_IDS::RESTORATION_SHAMAN,
+    //PRIEST
+    SPECS_SKILL_IDS::HOLY_PRIEST,
+    SPECS_SKILL_IDS::DISCIPLINE,
+    SPECS_SKILL_IDS::SHADOW,
+    //PALADIN
+    SPECS_SKILL_IDS::RETRIBUTION,
+    SPECS_SKILL_IDS::PROTECTION_PALADIN,
+    SPECS_SKILL_IDS::HOLY_PALADIN,
+    //MAGE
+    SPECS_SKILL_IDS::FROST,
+    SPECS_SKILL_IDS::FIRE,
+    SPECS_SKILL_IDS::ARCANE,
+    //WARLOCK
+    SPECS_SKILL_IDS::DEMONOLOGY,
+    SPECS_SKILL_IDS::AFFLICTION,
+    SPECS_SKILL_IDS::DESTRUCTION,
+    //WARRIOR
+    SPECS_SKILL_IDS::PROTECTION_WARRIOR,
+    SPECS_SKILL_IDS::FURY,
+    SPECS_SKILL_IDS::ARMS,
+    //DRUID
+    SPECS_SKILL_IDS::RESTORATION_DRUID,
+    SPECS_SKILL_IDS::BALANCE,
+    SPECS_SKILL_IDS::FERAL_COMBAT,
 };
 
-vector<pair<uint32, uint32>> completedDungeonAchievementIds = {
-    // dungeon instance id, completed achiviement id
-    {THE_DEADMINES, 628},
-    {RAGEFIRE_CHASM, 629},
-    {WAILING_CAVERNS, 630},
-    {SHADOWFANG_KEEP, 631},
-    {BLACKFATHOM_DEEPS, 632},
-    {THE_STOCKADE, 633},
-    {GNOMEREGAN, 634},
-    {RAZORFEN_KRAUL, 635},
-};
-
-class LearnSpellsOnLevelUp : public PlayerScript
+class LearnClasslessDefaults : public PlayerScript
 {
 public:
-    LearnSpellsOnLevelUp() : PlayerScript("LearnSpellsOnLevelUp") {}
+    LearnClasslessDefaults() : PlayerScript("LearnClasslessDefaults") {
+        
+    }
 
+       
 
-    void OnFirstLogin(Player *player) override
+    void OnPlayerFirstLogin (Player *player) override
     {
-        if (player->GetSession()->IsBot())
-        {
-            return;
-        }
+        
+            for (const auto& skills : autoLearnSkills)
+            {
+                player->SetSkill(static_cast<uint16_t>(skills.first), 5, 1, 5);
+                player->learnSpell(static_cast<uint32_t>(skills.second), false, false);
+            }
 
-        for (const auto &skills : autoLearnSkills)
-        {
-            player->SetSkill(static_cast<uint16_t>(skills.first), 5, 1, 5);
-            player->learnSpell(static_cast<uint32_t>(skills.second), false, false);
-        }
+            for (const auto& profession : autoLearnProfessions)
+            {
+                player->SetSkill(static_cast<uint16_t>(profession.first), 75, 1, 1);
+                player->learnSpell(static_cast<uint32_t>(profession.second), false, false);
+            }
 
-        for (const auto &profession : autoLearnProfessions)
-        {
-            player->SetSkill(static_cast<uint16_t>(profession.first), 75, 1, 1);
-            player->learnSpell(static_cast<uint32_t>(profession.second), false, false);
-        }
+            for (const auto& spec : classSpecs)
+            {
+                player->SetSkill(static_cast<uint16_t>(spec), 300, 1, 1);
+            }
+      
+
+
     }
 };
 
 void AddSC_LearnAllSpells()
 {
-    new LearnSpellsOnLevelUp();
+    new LearnClasslessDefaults();
 }

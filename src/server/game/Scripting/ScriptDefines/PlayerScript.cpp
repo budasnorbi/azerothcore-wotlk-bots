@@ -921,6 +921,8 @@ bool ScriptMgr::OnPlayerCanResurrect(Player* player)
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_RESURRECT, !script->OnPlayerCanResurrect(player));
 }
 
+
+
 PlayerScript::PlayerScript(const char* name, std::vector<uint16> enabledHooks)
     : ScriptObject(name, PLAYERHOOK_END)
 {

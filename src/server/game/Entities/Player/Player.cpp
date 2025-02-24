@@ -11939,11 +11939,13 @@ void Player::LearnDefaultSkills()
 {
     // learn default race/class skills
     PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
+    bool isBot = GetSession()->IsBot();
+
     for (PlayerCreateInfoSkills::const_iterator itr = info->skills.begin(); itr != info->skills.end(); ++itr)
     {
         uint32 skillId = itr->SkillId;
-
-        if (skillId == 573 || skillId == 574)
+        
+        if (!isBot && (skillId == 573 || skillId == 574))
         {
             continue;
         }
