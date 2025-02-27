@@ -342,7 +342,7 @@ local function DoShit()
     --Utility Functions
     function GetPoints(type)
         if type == "ap" then
-            local ap = math.floor(UnitLevel("player") * 0.45) - #db.spells
+            local ap = math.floor(UnitLevel("player")) - #db.spells
             local tap = #spellsplus
             return ap - tap, tap
         end

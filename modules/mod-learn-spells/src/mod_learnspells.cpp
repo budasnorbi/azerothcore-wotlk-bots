@@ -243,7 +243,9 @@ public:
 
     void OnPlayerFirstLogin (Player *player) override
     {
-        
+            if(player->GetSession()->IsBot()){
+                return;
+            }
             for (const auto& skills : autoLearnSkills)
             {
                 player->SetSkill(static_cast<uint16_t>(skills.first), 5, 1, 5);
@@ -261,8 +263,6 @@ public:
                 player->SetSkill(static_cast<uint16_t>(spec), 300, 1, 1);
             }
       
-
-
     }
 };
 

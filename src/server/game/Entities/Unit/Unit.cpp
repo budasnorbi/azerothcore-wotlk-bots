@@ -9007,6 +9007,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
     // Try handle unknown trigger spells
     //if (sSpellMgr->GetSpellInfo(trigger_spell_id) == nullptr)
+
+    if (auraSpellInfo->SpellIconID == 2127)     // Blazing Speed
+                {
+                    switch (auraSpellInfo->Id)
+                    {
+                        case 31641:  // Rank 1
+                        case 31642:  // Rank 2
+                            trigger_spell_id = 31643;
+                            
+                        default:
+                            LOG_ERROR("entities.unit", "Unit::HandleProcTriggerSpell: Spell {} miss posibly Blazing Speed", auraSpellInfo->Id);
+                            return false;
+                    }
+                }
+
     {
         switch (auraSpellInfo->SpellFamilyName)
         {
@@ -9090,20 +9105,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 }
                 break;
             case SPELLFAMILY_MAGE:
-                if (auraSpellInfo->SpellIconID == 2127)     // Blazing Speed
-                {
-                    switch (auraSpellInfo->Id)
-                    {
-                        case 31641:  // Rank 1
-                        case 31642:  // Rank 2
-                            trigger_spell_id = 31643;
-                            break;
-                        default:
-                            LOG_ERROR("entities.unit", "Unit::HandleProcTriggerSpell: Spell {} miss posibly Blazing Speed", auraSpellInfo->Id);
-                            return false;
-                    }
-                }
-                else if (auraSpellInfo->Id == 71761) // Deep Freeze Immunity State (only permanent)
+                
+                if (auraSpellInfo->Id == 71761) // Deep Freeze Immunity State (only permanent)
                 {
                     Creature* creature = victim->ToCreature();
                     if (!creature || !creature->HasMechanicTemplateImmunity(1 << (MECHANIC_STUN - 1)))

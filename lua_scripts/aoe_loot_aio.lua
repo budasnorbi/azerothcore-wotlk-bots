@@ -3,6 +3,9 @@ local AddonHandler = AIO.AddHandlers("AOELoot", {});
 
 if AIO.AddAddon() then
     function AddonHandler.OnStatusChange(player, status)
+        if(player:IsBot()) then
+            return
+        end
         player:SetData("AOE_LOOT_STATUS", status and true or false)
     end
 else

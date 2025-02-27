@@ -48,6 +48,10 @@ end]]
 -- Then applies the rage to the player
 -- Then checks if the spell has ragegen as true, if true Jumps to BloodEnRage
 function SetRage(player, rage, spell ,ragegen, rageps)
+    if(player:IsBot()) then
+        return
+    end
+
     for i, v in pairs(chargetable) do
         if (spell == v) then
             rage = CheckCharge(player, rage)
@@ -77,6 +81,9 @@ end
 -- Maybe make a universal function that applies a boost stated in the table for each spell
 --      instead of creating a unique function for each thing that happens
 function CheckCharge(player, rage)
+    if(player:IsBot()) then
+        return
+    end
     rage = rage
     if (player:HasSpell(12285)) then
         rage = rage + 50

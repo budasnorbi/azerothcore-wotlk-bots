@@ -13,6 +13,9 @@ function randomString(length)
 end
 
 function checkSecret(player, client, server)
+    if(player:IsBot()) then
+        return
+    end
 	local valid = (client == server)
 	if not (valid) then
 		player:SendNotification("ERRORMSG")

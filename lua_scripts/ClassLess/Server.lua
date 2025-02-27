@@ -46,7 +46,6 @@ end
 local AIO = AIO or require("AIO")
 local MyHandlers = AIO.AddHandlers(handlerName, {})
 local spells, tpells, talents, stats, resets = {}, {}, {}, {}, {}
-local AttributesAuraIds = { 7464, 7471, 7477, 7468, 7474 } -- Strength, Agility, Stamina, Intellect, Spirit
 
 local function SendVars(msg, player, resend)
     if(player:IsBot())then
@@ -140,11 +139,17 @@ RegisterPlayerEvent(4, OnLogout)
 local plrs = GetPlayersInWorld()
 if plrs then
     for i, player in ipairs(plrs) do
+        if(player:IsBot()) then
+            return
+        end
         OnLogin(i, player)
     end
 end
 
 function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
+    if(player:IsBot()) then
+        return
+    end
 	local isValid = checkSecret(player, clientSecret, serverSecret)
 	if not (isValid) then return end
     local guid = player:GetGUIDLow()
@@ -168,6 +173,9 @@ end
 for i = 1, #tpells[guid] do
   local spell = tpells[guid][i]
   if not tContains(spr, spell) then
+    if(player:IsBot()) then
+        return
+    end
     player:RemoveSpell(spell)
   end
 end
@@ -179,6 +187,9 @@ end
 end
 
 function MyHandlers.LearnTalent(player, tar, clientSecret)
+    if(player:IsBot()) then
+        return
+    end
 	local isValid = checkSecret(player, clientSecret, serverSecret)
 	if not (isValid) then return end
     local guid = player:GetGUIDLow()
@@ -214,6 +225,9 @@ function MyHandlers.LearnTalent(player, tar, clientSecret)
 end
 
 function MyHandlers.WipeAll(player, clientSecret)
+    if(player:IsBot()) then
+        return
+    end
 	local isValid = checkSecret(player, clientSecret, serverSecret)
     if not (isValid) then return end
 

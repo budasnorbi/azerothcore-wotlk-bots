@@ -134,6 +134,9 @@ local prevTime = os.clock()
 -- true == add_points
 -- false == remove_points
 function parangon_addon.setStatsInformation(player, stat, value, flags)
+    if(player:IsBot()) then
+        return
+    end
     if(player:IsInCombat())then
         return
     end
@@ -311,6 +314,9 @@ end
 
 
 function parangon.setExp(player, victim)
+    if(player:IsBot()) then
+        return
+    end
     local pAcc = player:GetAccountId()
 
     if not parangon.account[pAcc] then

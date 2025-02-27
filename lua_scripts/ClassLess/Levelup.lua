@@ -3,12 +3,15 @@
 -- | _|| _|| |_\ \/\/ / (_) | (_) | |) | |   / _||  _/ _ \ (__| ' < 
 -- |_| |___|____\_/\_/ \___/ \___/|___/  |_|_\___|_|/_/ \_\___|_|\_\
 
-
+--[[ 
 local function OnLevel(event, player)
+    if(player:IsBot()) then
+        return
+    end
 local level=player:GetLevel()
-if level>=10 then if not player:HasSkill(414) then player:SetSkill(414, 0, 1, 1) end end
+ if level>=10 then if not player:HasSkill(414) then player:SetSkill(414, 0, 1, 1) end end
 if level>=20 then if not player:HasSkill(413) then player:SetSkill(413, 0, 1, 1) end end
-if level>=40 then if not player:HasSkill(293) then player:SetSkill(293, 0, 1, 1) end end
+if level>=40 then if not player:HasSkill(293) then player:SetSkill(293, 0, 1, 1) end end 
 end
 
 RegisterPlayerEvent(13, OnLevel)
@@ -16,6 +19,9 @@ RegisterPlayerEvent(13, OnLevel)
 local plrs = GetPlayersInWorld()
 if plrs then
     for i, player in ipairs(plrs) do
+        if(player:IsBot()) then
+            return
+        end
         OnLevel(i, player)
     end
-end
+end ]]

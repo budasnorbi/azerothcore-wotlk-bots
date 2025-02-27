@@ -1,5 +1,8 @@
 local controller = {}
 controller.OnLootFrameOpen = function(event, packet, player)
+    if(player:IsBot()) then
+        return
+    end
     local aoe_loot_active = player:GetData("AOE_LOOT_STATUS") or false
     if aoe_loot_active then
         local selection = player:GetSelection()
@@ -22,6 +25,9 @@ controller.OnLootFrameOpen = function(event, packet, player)
 end
 RegisterPacketEvent(0x15D, 5, controller.OnLootFrameOpen)
 controller.GetLootableCreatures = function(player)
+    if(player:IsBot()) then
+        return
+    end
     local creatures_in_range = player:GetCreaturesInRange(50, 0, 0, 2)
     local lootable_creatures
     do
@@ -39,7 +45,9 @@ controller.GetLootableCreatures = function(player)
     return lootable_creatures
 end
 controller.SetCreatureLoot = function(player, creature, lootable_creatures)
-    print(creature) -- Check if creature is not nil
+    if(player:IsBot()) then
+        return
+    end
     if creature.GetLoot == nil then
         print("GetLoot method is not available for this creature")
         return
