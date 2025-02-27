@@ -28,7 +28,7 @@ local parangon = {}
 local parangon_addon = AIO.AddHandlers("AIO_Parangon", {})
 
 -- Create the main window frame
-parangon.mainWindow = CreateFrame("Frame", parangon.mainWindow, UIParent)
+parangon.mainWindow = CreateFrame("Frame", "ParangonMainWindow", UIParent)
 parangon.mainWindow:SetSize(300, 520)
 parangon.mainWindow:EnableMouse(true)
 parangon.mainWindow:SetPoint("CENTER", 0, 50)
@@ -40,7 +40,7 @@ parangon.mainWindow:SetScript("OnDragStart", parangon.mainWindow.StartMoving)
 parangon.mainWindow:SetScript("OnDragStop",
     parangon.mainWindow.StopMovingOrSizing)
 
-
+tinsert(UISpecialFrames, "ParangonMainWindow")
 
 
 parangon.mainWindowTexture = parangon.mainWindow:CreateTexture()
