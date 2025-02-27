@@ -1020,6 +1020,7 @@ local function DoShit()
     frame.titleTexture:SetSize(967, 24) -- texture is the same size as the title drag bar
     frame.titleTexture:SetPoint("TOPLEFT")
 
+    tinsert(UISpecialFrames, "CLMainFrame")
 
     frame:RegisterForDrag("LeftButton")
     frame:SetToplevel(true)
