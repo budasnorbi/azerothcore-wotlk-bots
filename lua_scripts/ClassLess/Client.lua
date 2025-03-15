@@ -1,16 +1,9 @@
---  ___ ___ _ __      _____   ___  ___    ___ ___ ___  _   ___ _  __
--- | __| __| |\ \    / / _ \ / _ \|   \  | _ \ __| _ \/_\ / __| |/ /
--- | _|| _|| |_\ \/\/ / (_) | (_) | |) | |   / _||  _/ _ \ (__| ' <
--- |_| |___|____\_/\_/ \___/ \___/|___/  |_|_\___|_|/_/ \_\___|_|\_\
-
-
 local AIO = AIO or require("AIO")
 
 -- CLIENT SECRET
 local clientSecret = ""
 local handlerName = "yQ4CiWjHET"
 
---|TInterface/ICONS/VAS_RaceChange:35:35|t
 local LastContainerNum = 1
 -- Settings
 local iconSize = 35
@@ -21,90 +14,85 @@ local current_spec = 1
 local prices = {}
 
 -- Ready-to-use for the system
-
-local classes = { "Druid", "Hunter", "Mage", "Paladin", "Priest", "Rogue", "Shaman", "Warlock", "Warrior", "MONK",
-    "DEMONHUNTER" };
-local class_list = { "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR" }
+local classes = {
+    "Druid", "Hunter", "Mage", "Paladin", "Priest", "Rogue", "Shaman",
+    "Warlock", "Warrior", "MONK", "DEMONHUNTER"
+};
+local class_list = {
+    "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN",
+    "WARLOCK", "WARRIOR"
+}
 local spell_point_list = {}
 local talent_point_list = {}
 
 -- Layout configuration object - easily modify these values to adjust positioning
 local layoutConfig = {
     -- Main frame dimensions
-    frameWidth = 750,                -- Main frame width
-    contentPadding = 25,             -- Padding around content
-    columnHeight = 500,              -- Height of scrollable area
-    topOffset = -55,                  -- Space at top for headers
-    
+    frameWidth = 750,
+    contentPadding = 25,
+    columnHeight = 540,
+    topOffset = -55,
+
     -- Header positioning
-    mainHeaderSpacing = 10,          -- Space between main headers
-    mainHeadersY = 100,              -- Vertical position of main headers
-    
+    mainHeaderSpacing = 10,
+    mainHeadersY = 100,
+
     -- Specialization section
-    specSpacing = 70,                -- Vertical space between specializations
-    specHeaderHeight = 30,           -- Height of specialization header
-    specIconSize = 36,               -- Size of specialization icon
-    specNamePadding = 10,            -- Space between spec icon and name
-    
+    specSpacing = 70,
+    specHeaderHeight = 30,
+    specIconSize = 36,
+    specNamePadding = 10,
+
     -- Column widths and positions
-    spellLabelOffset = 40,           -- Distance from spec name to spell label
-    talentLabelOffset = 80,          -- Distance from spell label to talent label
-    contentTopPadding = 50,          -- Space below spec header before content
-    
+    spellLabelOffset = 40,
+    talentLabelOffset = 80,
+    contentTopPadding = 50,
+
     -- Grid layout
-    iconSize = 35,                   -- Size of spell/talent icons 
-    iconHorizontalSpacing = 50,      -- Horizontal space between icons
-    iconVerticalSpacing = 65,        -- Vertical space between rows of icons
-    iconsPerHalfRow = 6,             -- Number of icons per half row
-    
+    iconSize = 35,
+    iconHorizontalSpacing = 50,
+    iconVerticalSpacing = 65,
+    iconsPerHalfRow = 6,
+
     -- Class-specific offsets to fine-tune alignment
-    -- Format: [class][specIndex] = {spellsOffset, talentsOffset}
     classSpecOffsets = {
-        ["DRUID"] =    {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["HUNTER"] =   {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["MAGE"] =     {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["PALADIN"] =  {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["PRIEST"] =   {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["ROGUE"] =    {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["SHAMAN"] =   {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["WARLOCK"] =  {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}},
-        ["WARRIOR"] =  {[1] = {0, 0},  [2] = {0, 0},  [3] = {0, 0}}
+        ["DRUID"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["HUNTER"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["MAGE"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["PALADIN"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["PRIEST"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["ROGUE"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["SHAMAN"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["WARLOCK"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}},
+        ["WARRIOR"] = {[1] = {0, 0}, [2] = {0, 0}, [3] = {0, 0}}
     }
 }
 
-
---Data
+-- Data
 if AIO.IsServer() then
-    --Spells
+    -- Spells
     AIO.AddAddon("lua_scripts\\ClassLess\\data\\spells.data", "spells")
-    --Talents
+    -- Talents
     AIO.AddAddon("lua_scripts\\ClassLess\\data\\talents.data", "talents")
-    --Locks
+    -- Locks
     AIO.AddAddon("lua_scripts\\ClassLess\\data\\locks.data", "locks")
-    --Requirements
+    -- Requirements
     AIO.AddAddon("lua_scripts\\ClassLess\\data\\req.data", "req")
 end
 
-if AIO.AddAddon() then
-    return
-end
+if AIO.AddAddon() then return end
 
---Variables
-
+-- Variables
 local spellsplus, spellsminus = {}, {}
 local tpellsplus, tpellsminus = {}, {}
 local talentsplus, talentsminus = {}, {}
 local db = CLDB
 
---Functions
-
+-- Functions
 local function CountSpellPoints(c, s)
     local r = 0
     for k, v in pairs(db.data.spells[class_list[c]][s][4]) do
-        --check if v[1][1] in db.spells, if so r++
-        if tContains(db.spells, v[1][1]) then
-            r = r + 1
-        end
+        if tContains(db.spells, v[1][1]) then r = r + 1 end
     end
     return r
 end
@@ -112,18 +100,15 @@ end
 local function CountTalentPoints(c, s)
     local r = 0
     for k, v in pairs(db.data.talents[class_list[c]][s][4]) do
-        --check if v[1][1] in db.spells, if so r++
         for i, j in pairs(v[1]) do
-            if tContains(db.talents, j) then
-                r = r + 1
-            end
+            if tContains(db.talents, j) then r = r + 1 end
         end
     end
     return r
 end
 
 local function UpdatePointText()
-    for k, v in pairs(class_list) do --zeta
+    for k, v in pairs(class_list) do
         local cap = 0
         local ctp = 0
         for i = 1, 3 do
@@ -132,13 +117,17 @@ local function UpdatePointText()
             local tp = CountTalentPoints(k, i)
             ctp = ctp + tp
             for j = 1, 2 do
-                _G["CLContainer" .. j .. "Sub" .. k .. "SubButton" .. i].text:SetText(tostring(ap))
-                _G["CLContainer" .. j .. "Sub" .. k .. "SubButton" .. i].text2:SetText(tostring(tp))
+                _G["CLContainer" .. j .. "Sub" .. k .. "SubButton" .. i].text:SetText(
+                    tostring(ap))
+                _G["CLContainer" .. j .. "Sub" .. k .. "SubButton" .. i].text2:SetText(
+                    tostring(tp))
             end
         end
         for j = 1, 2 do
-            _G["CLContainer" .. j .. "SubButton" .. k].text:SetText(tostring(cap))
-            _G["CLContainer" .. j .. "SubButton" .. k].text2:SetText(tostring(ctp))
+            _G["CLContainer" .. j .. "SubButton" .. k].text:SetText(
+                tostring(cap))
+            _G["CLContainer" .. j .. "SubButton" .. k].text2:SetText(tostring(
+                                                                         ctp))
         end
     end
 end
@@ -156,60 +145,53 @@ end
 
 local function FrameShow(fname)
     local frame = fname
-    if type(fname) ~= "table" then
-        frame = _G[fname]
-    end
-    if frame ~= nil and frame:IsVisible() ~= 1 then
-        frame:Show()
-    end
+    if type(fname) ~= "table" then frame = _G[fname] end
+    if frame ~= nil and frame:IsVisible() ~= 1 then frame:Show() end
 end
 
 local function FrameHide(fname)
     local frame = fname
-    if type(fname) ~= "table" then
-        frame = _G[fname]
-    end
-    if frame ~= nil and frame:IsVisible() == 1 then
-        frame:Hide()
-    end
+    if type(fname) ~= "table" then frame = _G[fname] end
+    if frame ~= nil and frame:IsVisible() == 1 then frame:Hide() end
 end
 
---DoShit Function
-local function DoShit()
-    --Table Functions
-    local function tCopy(t)
-        local u = {}
-        for k, v in pairs(t) do
-            u[k] = v
-        end
-        return setmetatable(u, getmetatable(t))
-    end
+local function tCopy(t)
+    local u = {}
+    for k, v in pairs(t) do u[k] = v end
+    return setmetatable(u, getmetatable(t))
+end
 
+local function tContainsCache(arr, val)
+    if not arr.__lookupCache then
+        arr.__lookupCache = {}
+        for i, v in ipairs(arr) do arr.__lookupCache[v] = true end
+    end
+    return arr.__lookupCache[val] or false
+end
+
+-- Clear cache when modifying arrays
+local function clearArrayCache(arr)
+    if arr and arr.__lookupCache then arr.__lookupCache = nil end
+end
+
+-- Main UI Setup Function
+local function InitializeClasslessUI()
+    -- Table Functions
     local function tRemoveKey(table, key)
         for i = 1, #table do
-            if table[i] == key then
-                tremove(table, i)
-            end
+            if table[i] == key then tremove(table, i) end
         end
     end
 
     local function tCompare(t1, t2)
-        if #t1 ~= #t2 then
-            return false
-        end
-        for i = 1, #t1 do
-            if t1[i] ~= t2[i] then
-                return false
-            end
-        end
+        if #t1 ~= #t2 then return false end
+        for i = 1, #t1 do if t1[i] ~= t2[i] then return false end end
         return true
     end
 
     local function pairsSort(t, f)
         local a = {}
-        for n in pairs(t) do
-            table.insert(a, n)
-        end
+        for n in pairs(t) do table.insert(a, n) end
         table.sort(a, f)
         local i = 0
         local iter = function()
@@ -223,15 +205,11 @@ local function DoShit()
         return iter
     end
 
-    --Frame Creation Functions
+    -- Frame Creation Functions
     local function CreateTexture(base, layer, path, blend)
         local t = base:CreateTexture(nil, layer)
-        if path then
-            t:SetTexture(path)
-        end
-        if blend then
-            t:SetBlendMode(blend)
-        end
+        if path then t:SetTexture(path) end
+        if blend then t:SetBlendMode(blend) end
         return t
     end
 
@@ -251,10 +229,6 @@ local function DoShit()
         t = CreateTexture(frame, "BACKGROUND")
         t:SetPoint("TOPLEFT", frame.topleft, "BOTTOMRIGHT")
         frame.bottomright = t
-        -- frame.topleft:SetTexture(background .. "-TopLeft")
-        --frame.topright:SetTexture(background .. "-TopRight")
-        -- frame.bottomleft:SetTexture(background .. "-BottomLeft")
-        --frame.bottomright:SetTexture(background .. "-BottomRight")
     end
 
     local function FrameLayout(frame, width, height)
@@ -263,7 +237,8 @@ local function DoShit()
 
         frame:SetSize(width, height)
 
-        local wl, wr, ht, hb = texture_width * 256, texture_width * 64, texture_height * 256, texture_height * 128
+        local wl, wr, ht, hb = texture_width * 256, texture_width * 64,
+                               texture_height * 256, texture_height * 128
 
         frame.topleft:SetSize(wl, ht)
         frame.topright:SetSize(wr, ht)
@@ -271,7 +246,7 @@ local function DoShit()
         frame.bottomright:SetSize(wr, hb)
     end
 
-    local function MakeButton(name, parent) --gamma
+    local function MakeButton(name, parent)
         local button = CreateFrame("Button", name, parent)
 
         button:SetNormalFontObject(GameFontNormal)
@@ -284,7 +259,6 @@ local function DoShit()
             else
                 texture:SetTexture("Interface\\Icons\\Ability_Marksmanship")
             end
-            -- texture:SetTexCoord(0, 0.625, 0, 0.6875)
             local size = button:GetSize()
             texture:SetAllPoints()
             texture:SetSize(0.5 * size, 0.5 * size)
@@ -312,49 +286,51 @@ local function DoShit()
     end
 
     local function MakeRankFrame(button, anchor)
-        --local t = CreateTexture(button, "OVERLAY", "Interface\\Textures\\border")
-        t:SetSize(32, 32)
-        t:SetPoint("CENTER", button, anchor)
-        local fs = button:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        --fs.texture = t
+        local fs =
+            button:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         fs:SetPoint("TOP", button, "BOTTOM", 0, -2)
         return fs
     end
 
     local function NewButton(name, parent, size, icon, rank, a, b, c, d, empty)
         local button = CreateFrame("Button", name, parent)
-        -- ItemButtonTemplate (minus Count and Slot)
         button:SetSize(size, size)
-        local t = CreateTexture(button, "BORDER")
+
+        -- Set up the texture
+        local t = button:CreateTexture(nil, "BORDER")
         t:SetSize(size * 0.8, size * 0.8)
         t:SetPoint("CENTER")
         button.texture = t
+
         if (empty == nil) then
-            t = CreateTexture(button, nil, "Interface\\Buttons\\CLCircle")
+            t = button:CreateTexture(nil, "ARTWORK")
+            t:SetTexture("Interface\\Buttons\\CLCircle")
             t:SetSize(size * 1.2, size * 1.2)
             t:SetPoint("CENTER")
             button.normal = t
             button:SetNormalTexture(t)
-            t = CreateTexture(button, nil, "Interface\\Buttons\\CLCircleActive")
+
+            t = button:CreateTexture(nil, "ARTWORK")
+            t:SetTexture("Interface\\Buttons\\CLCircleActive")
             t:SetSize(size * 1.2, size * 1.2)
             t:SetPoint("CENTER")
             button.pushed = t
             button:SetPushedTexture(t)
         end
+
         if rank ~= nil then
             button.rank = MakeRankFrame(button, "BOTTOMRIGHT")
         end
 
         if icon ~= nil then
             button.texture:SetTexture(icon)
-            if a ~= nil then
-                button.texture:SetTexCoord(a, b, c, d)
-            end
+            if a ~= nil then button.texture:SetTexCoord(a, b, c, d) end
         end
+
         return button
     end
 
-    --Utility Functions
+    -- Utility Functions
     function GetPoints(type)
         if type == "ap" then
             local ap = math.floor(UnitLevel("player")) - #db.spells
@@ -364,9 +340,7 @@ local function DoShit()
 
         if type == "tp" then
             local tp = UnitLevel("player") - 9
-            if tp < 0 then
-                tp = 0
-            end
+            if tp < 0 then tp = 0 end
             tp = tp - (#db.talents + #db.tpells)
             local ttp = #talentsplus + #tpellsplus
             return tp - ttp, ttp
@@ -374,7 +348,7 @@ local function DoShit()
         return 0, 0
     end
 
-    --main Frame Functions
+    -- main Frame Functions
     local function SelectTab(tab, cname, pname, bname)
         if tab ~= 0 then
             local parent = _G[pname]
@@ -382,111 +356,113 @@ local function DoShit()
 
             local button, lbutton = _G[bname .. tab], _G[bname .. ltab]
             local child, lchild = _G[cname .. tab], _G[cname .. ltab]
-            if lchild ~= nil then
-                FrameHide(lchild)
-            end
-            if lbutton ~= nil then
-                lbutton:SetButtonState("NORMAL")
-            end
+            if lchild ~= nil then FrameHide(lchild) end
+            if lbutton ~= nil then lbutton:SetButtonState("NORMAL") end
             if button ~= nil then
                 button:SetButtonState("PUSHED", true)
             end
-            if child ~= nil then
-                FrameShow(child)
-            end
+            if child ~= nil then FrameShow(child) end
             parent:SetAttribute("tab", tab)
         end
     end
 
     local function LearnConfirm(action, state)
-        local tab = _G["CLMainFrame"]:GetAttribute("tab")
-        if tab ~= nil and tab > 0 then
-            if action == "Apply" and state ~= "true" then
-                StaticPopup_Show("LEARN_CONFIRM")
-            end
-            if action == "Reset" and state ~= "true" then
-                StaticPopup_Show("RESET_CONFIRM")
-            end
-
-            if action == "Apply" and state == "true" then
-                if tab == 1 then
-                    for i = 1, #spellsplus do
-                        if not tContains(db.spells, spellsplus[i]) then
-                            tinsert(db.spells, spellsplus[i])
-                        end
-                    end
-                    for i = 1, #tpellsplus do
-                        if not tContains(db.tpells, tpellsplus[i]) then
-                            tinsert(db.tpells, tpellsplus[i])
-                        end
-                    end
-                    for i = 1, #spellsminus do
-                        if tContains(db.spells, spellsminus[i]) then
-                            tRemoveKey(db.spells, spellsminus[i])
-                        end
-                    end
-                    for i = 1, #tpellsminus do
-                        if tContains(db.tpells, tpellsminus[i]) then
-                            tRemoveKey(db.tpells, tpellsminus[i])
-                        end
-                    end
-                    wipe(spellsplus)
-                    wipe(spellsminus)
-                    wipe(tpellsplus)
-                    wipe(tpellsminus)
-                    sort(db.spells)
-                    sort(db.tpells)
-                    AIO.Handle(handlerName, "LearnSpell", db.spells, db.tpells, clientSecret)
-                end
-
-                if tab == 2 then
-                    for i = 1, #talentsplus do
-                        if not tContains(db.talents, talentsplus[i]) then
-                            tinsert(db.talents, talentsplus[i])
-                        end
-                    end
-                    for i = 1, #talentsminus do
-                        if tContains(db.talents, talentsminus[i]) then
-                            tRemoveKey(db.talents, talentsminus[i])
-                        end
-                    end
-                    wipe(talentsplus)
-                    wipe(talentsminus)
-                    sort(db.talents)
-                    AIO.Handle(handlerName, "LearnTalent", db.talents, clientSecret)
-                end
-            end
-
-            if action == "Reset" and state == "true" then
-                if tab == 1 then
-                    wipe(spellsplus)
-                    wipe(spellsminus)
-                    wipe(tpellsplus)
-                    wipe(tpellsminus)
-                end
+        if action == "Apply" and state == "true" then
+            -- Always apply both spell and talent changes
             
-                if tab == 2 then
-                    wipe(talentsplus)
-                    wipe(talentsminus)
+            -- Apply spell changes
+            for i = 1, #spellsplus do
+                if not tContains(db.spells, spellsplus[i]) then
+                    tinsert(db.spells, spellsplus[i])
                 end
-                
-                -- Add this new code to force refresh
-                local currentClass = current_class
-                local currentSpec = current_spec
-                
-                -- Force refresh the display by re-showing the current spec
-                if tab == 1 or tab == 2 then
-                    local containerFrame = _G["CLContainer" .. tab .. "Sub" .. currentClass .. "Sub" .. currentSpec]
-                    if containerFrame then
-                        -- Hide and show to trigger OnShow script which will refresh spells
-                        containerFrame:Hide()
-                        containerFrame:Show()
+            end
+            for i = 1, #tpellsplus do
+                if not tContains(db.tpells, tpellsplus[i]) then
+                    tinsert(db.tpells, tpellsplus[i])
+                end
+            end
+            for i = 1, #spellsminus do
+                if tContains(db.spells, spellsminus[i]) then
+                    tRemoveKey(db.spells, spellsminus[i])
+                end
+            end
+            for i = 1, #tpellsminus do
+                if tContains(db.tpells, tpellsminus[i]) then
+                    tRemoveKey(db.tpells, tpellsminus[i])
+                end
+            end
+            wipe(spellsplus)
+            wipe(spellsminus)
+            wipe(tpellsplus)
+            wipe(tpellsminus)
+            sort(db.spells)
+            sort(db.tpells)
+            AIO.Handle(handlerName, "LearnSpell", db.spells, db.tpells, clientSecret)
+            
+            -- Apply talent changes
+            for i = 1, #talentsplus do
+                if not tContains(db.talents, talentsplus[i]) then
+                    tinsert(db.talents, talentsplus[i])
+                end
+            end
+            for i = 1, #talentsminus do
+                if tContains(db.talents, talentsminus[i]) then
+                    tRemoveKey(db.talents, talentsminus[i])
+                end
+            end
+            wipe(talentsplus)
+            wipe(talentsminus)
+            sort(db.talents)
+            AIO.Handle(handlerName, "LearnTalent", db.talents, clientSecret)
+            
+            -- Force a full UI refresh for all classes
+            for k, v in pairs(class_list) do
+                for j = 1, 2 do
+                    local classButton = _G["CLContainer" .. j .. "SubButton" .. k]
+                    if classButton and classButton.text then
+                        local cap = 0
+                        for i = 1, 3 do
+                            cap = cap + CountSpellPoints(k, i)
+                        end
+                        classButton.text:SetText(tostring(cap))
+    
+                        local ctp = 0
+                        for i = 1, 3 do
+                            ctp = ctp + CountTalentPoints(k, i)
+                        end
+                        classButton.text2:SetText(tostring(ctp))
                     end
                 end
             end
-            UpdatePointText()
-            SelectTab(tab, "CLContainer", "CLMainFrame", "CLButton")
+        elseif action == "Reset" and state == "true" then
+            -- Reset all pending changes regardless of tab
+            wipe(spellsplus)
+            wipe(spellsminus)
+            wipe(tpellsplus)
+            wipe(tpellsminus)
+            wipe(talentsplus)
+            wipe(talentsminus)
+    
+            -- Force refresh the display for current class/spec
+            local currentClass = current_class
+            local currentSpec = current_spec
+            
+            -- Refresh both containers to be safe
+            for tab = 1, 2 do
+                local containerFrame = _G["CLContainer" .. tab .. "Sub" ..
+                                           currentClass .. "Sub" .. currentSpec]
+                if containerFrame then
+                    containerFrame:Hide()
+                    containerFrame:Show()
+                end
+            end
         end
+    
+        UpdatePointText()
+        
+        -- Force tab 1 to always be shown
+        local tab = 1
+        SelectTab(tab, "CLContainer", "CLMainFrame", "CLButton")
     end
 
     ------Fill Spells Functions
@@ -543,7 +519,8 @@ local function DoShit()
     end
 
     local function ParseTooltip(spell)
-        local f = CreateFrame("GameTooltip", "CLTmpTooltip", UIParent, "GameTooltipTemplate")
+        local f = CreateFrame("GameTooltip", "CLTmpTooltip", UIParent,
+                              "GameTooltipTemplate")
         f:SetOwner(UIParent, "ANCHOR_NONE")
         local link = GetSpellLink(spell)
         if link == nil then
@@ -557,8 +534,9 @@ local function DoShit()
         for i = 1, select("#", f:GetRegions()) do
             local ttl = _G["CLTmpTooltipTextLeft" .. i]
             local ttr = _G["CLTmpTooltipTextRight" .. i]
-            if (ttl ~= nil and ttl:GetText() ~= nil) and (ttr ~= nil and ttr:GetText() ~= nil) then
-                tinsert(t, { ttl:GetText(), ttr:GetText() })
+            if (ttl ~= nil and ttl:GetText() ~= nil) and
+                (ttr ~= nil and ttr:GetText() ~= nil) then
+                tinsert(t, {ttl:GetText(), ttr:GetText()})
             elseif (ttl ~= nil and ttl:GetText() ~= nil) then
                 tinsert(t, ttl:GetText())
             end
@@ -569,89 +547,143 @@ local function DoShit()
         return t
     end
 
-    local function ButtonTooltip(button, spell, nspell, rank, ranks, level, lcolor, ccolor, state, cost, lock, req, rreq)
+    local function ButtonTooltip(button, spell, nspell, rank, ranks, level, lcolor, ccolor, state, cost, lock, req, rreq, istalent)
         local bname = button:GetName()
-        local pt = ParseTooltip(spell)
-        local c = RED_FONT_COLOR
         
-        -- Create tooltip if it doesn't exist
-        if not _G[bname .. "tooltip"] then
+        -- Create tooltip once and reuse it
+        if not button.tooltip then
             local tooltip = CreateFrame("GameTooltip", bname .. "tooltip", UIParent, "GameTooltipTemplate")
-            -- Set tooltip to a higher frame strata to ensure it appears on top
             tooltip:SetFrameStrata("TOOLTIP")
+            
+            -- Create a custom background frame that sits behind the tooltip content
+            local bg = CreateFrame("Frame", nil, tooltip)
+            bg:SetPoint("TOPLEFT", 3, -3)
+            bg:SetPoint("BOTTOMRIGHT", -3, 3)
+            bg:SetFrameLevel(tooltip:GetFrameLevel() - 1)
+            
+            -- Add a texture to this background
+            local tex = bg:CreateTexture(nil, "BACKGROUND")
+            tex:SetAllPoints()
+            tex:SetTexture("Interface\\Tooltips\\UI-Tooltip-Background")
+            tex:SetVertexColor(0, 0, 0, 0.85)  -- Black with 85% opacity
+            
             button.tooltip = tooltip
-        else
-            button.tooltip = _G[bname .. "tooltip"]
-            -- Ensure tooltip has the proper strata
-            button.tooltip:SetFrameStrata("TOOLTIP")
+            button.tooltipBg = bg  -- Store reference to bg
         end
     
-        button:SetScript(
-            "OnEnter",
-            function()
-                button.tooltip:Hide()
-                button.tooltip:SetOwner(button, "ANCHOR_RIGHT")
-                local link = GetSpellLink(nspell)
-                if link == nil then
-                    link = GetSpellLink(78)
-                    link = gsub(link, "78", nspell)
-                end
-                button.tooltip:SetHyperlink(link)
-                button.tooltip:AddDoubleLine("Current rank", rank .. "/" .. ranks, 1, 1, 1, 1, 1, 1)
-                if pt[#pt] ~= nil and rank > 0 and ranks > 1 and rank ~= ranks then
-                    button.tooltip:AddLine(pt[#pt], nil, nil, nil, true)
-                end
-    
-                if rreq ~= nil then
-                    button.tooltip:AddLine(rreq, c.r, c.g, c.b)
-                end
-                if rank < ranks then
-                    if req ~= nil then
-                        button.tooltip:AddLine(req, c.r, c.g, c.b)
-                    end
-                    if lock ~= nil then
-                        button.tooltip:AddLine(lock, c.r, c.g, c.b)
-                    end
-                    if level ~= nil then
-                        button.tooltip:AddLine("Requires level " .. level, lcolor.r, lcolor.g, lcolor.b)
-                    end
-                    button.tooltip:AddLine(cost, ccolor.r, ccolor.g, ccolor.b)
-                end
-                button.tooltip:AddLine("SPELLID: " .. spell)
-                
-                -- Force the tooltip to display above other frames
-                button.tooltip:SetFrameLevel(100)
-                button.tooltip:Show()
-            end
-        )
-    
-        button:SetScript(
-            "OnLeave",
-            function()
-                button.tooltip:Hide()
-            end
-        )
-    end
+        button:SetScript("OnEnter", function()
+            button.tooltip:Hide()
+            button.tooltip:SetOwner(button, "ANCHOR_RIGHT")
 
-            -- Helper function to get class-specific offset
-            local function getClassSpecOffset(classKey, specIndex, offsetIndex)
-                if layoutConfig.classSpecOffsets[classKey] and 
-                   layoutConfig.classSpecOffsets[classKey][specIndex] then
-                    return layoutConfig.classSpecOffsets[classKey][specIndex][offsetIndex] or 0
+            
+            -- Set a consistent fixed width for ALL tooltips
+            local fixedWidth = 300  -- Same width for both spell and talent tooltips
+            -- Set minimum width for the tooltip to ensure consistency
+            button.tooltip:SetMinimumWidth(fixedWidth)
+            
+            -- Common tooltip processing regardless of type
+            local link
+            if istalent then
+                -- Talent tooltip handling
+                if rank > 0 then
+                    if rank < ranks then
+                        link = GetSpellLink(nspell) or gsub(GetSpellLink(78), "78", nspell)
+                    else
+                        link = GetSpellLink(spell) or gsub(GetSpellLink(78), "78", spell)
+                    end
+                else
+                    link = GetSpellLink(nspell) or gsub(GetSpellLink(78), "78", nspell)
                 end
-                return 0 -- Default offset if not defined
+            else
+                -- Regular spell tooltip
+                link = GetSpellLink(nspell) or gsub(GetSpellLink(78), "78", nspell)
             end
+            
+            -- Set the hyperlink and get the tooltip content
+            button.tooltip:SetHyperlink(link)
+            
+            -- Add talent-specific additional lines
+            if istalent then
+                if rank > 0 then
+                    if rank < ranks then
+                        button.tooltip:AddLine(" ")
+                        local currentName = GetSpellInfo(spell)
+                        --button.tooltip:AddLine(currentName, 0.6, 0.6, 0.6)
+                        
+                        local currentTooltipInfo = ParseTooltip(spell)
+                        if currentTooltipInfo and #currentTooltipInfo > 0 then
+                            for i = 2, min(3, #currentTooltipInfo) do
+                                if type(currentTooltipInfo[i]) == "string" then
+                                    button.tooltip:AddLine(currentTooltipInfo[i], 0.6, 0.6, 0.6)
+                                end
+                            end
+                        end
+                    else
+                        button.tooltip:AddLine("Max Rank: " .. rank .. "/" .. ranks, 0.1, 0.95, 0.1)
+                    end
+                else
+                    button.tooltip:AddLine("Rank: 1/" .. ranks, 1, 0.82, 0)
+                end
+            end
+            
+            -- Add additional info for all tooltips
+            if cost then button.tooltip:AddLine(cost, 1, 1, 1) end
+            if lock then button.tooltip:AddLine(lock, 1, 0, 0) end
+            if req then button.tooltip:AddLine(req, 1, 0, 0) end
+            if rreq then button.tooltip:AddLine(rreq, 1, 0.5, 0) end
+        
+            -- Show the tooltip first to get its natural dimensions
+            button.tooltip:Show()
+            
+            -- Resize our custom background to match the tooltip's current size
+            if button.tooltipBg then
+                button.tooltipBg:SetPoint("TOPLEFT", 2, -2)
+                button.tooltipBg:SetPoint("BOTTOMRIGHT", -2, 2)
+            end
+            
+            -- Apply consistent width to all text lines
+            for i = 1, button.tooltip:NumLines() do
+                local line = _G[bname .. "tooltipTextLeft" .. i]
+                if line then
+                    line:SetWidth(fixedWidth - 30)  -- Same padding for both types
+                end
+            end
+            
+            
+            
+            -- Refresh the tooltip
+            button.tooltip:Show()
+        end)
+    
+        button:SetScript("OnLeave", function() button.tooltip:Hide() end)
+    end
+    
+
+    -- Helper function to get class-specific offset
+    local function getClassSpecOffset(classKey, specIndex, offsetIndex)
+        if layoutConfig.classSpecOffsets[classKey] and
+            layoutConfig.classSpecOffsets[classKey][specIndex] then
+            return
+                layoutConfig.classSpecOffsets[classKey][specIndex][offsetIndex] or
+                    0
+        end
+        return 0 -- Default offset if not defined
+    end
 
     local function FillSpells(class, spec, parent, mode)
         -- Process spell data
         local spellcheck1 = tCopy(db.spells)
-        for i = 1, #spellsplus do
+        local i = 1
+        while i <= #spellsplus do
             if not tContains(spellcheck1, spellsplus[i]) then
                 tinsert(spellcheck1, spellsplus[i])
+                i = i + 1
             else
                 tremove(spellsplus, i)
+                -- Don't increment i when removing items
             end
         end
+
         for i = 1, #spellsminus do
             if tContains(spellcheck1, spellsminus[i]) then
                 tRemoveKey(spellcheck1, spellsminus[i])
@@ -659,7 +691,7 @@ local function DoShit()
                 tremove(spellsminus, i)
             end
         end
-    
+
         -- Process talent data
         local spellcheck2 = tCopy(db.talents)
         for i = 1, #talentsplus do
@@ -676,59 +708,71 @@ local function DoShit()
                 tremove(talentsminus, i)
             end
         end
-    
+
         local allspells = tCopy(spellcheck1)
         for i = 1, #spellcheck2 do
             if not tContains(allspells, spellcheck2[i]) then
                 tinsert(allspells, spellcheck2[i])
             end
         end
-    
+
         -- Get equality check for spells and talents
         local eqtSpell = "false"
-        if tCompare(db.spells, spellcheck1) then
-            eqtSpell = "true"
-        end
-        
+        if tCompare(db.spells, spellcheck1) then eqtSpell = "true" end
+
         local eqtTalent = "false"
-        if tCompare(db.talents, spellcheck2) then
-            eqtTalent = "true"
-        end
-            
+        if tCompare(db.talents, spellcheck2) then eqtTalent = "true" end
+
         -- Calculate derived values
-        local contentWidth = layoutConfig.frameWidth - (layoutConfig.contentPadding * 2)
+        local contentWidth = layoutConfig.frameWidth -
+                                 (layoutConfig.contentPadding * 2)
         local specHeaderWidth = contentWidth - 30 -- Width minus scrollbar
-        
+
         -- Create global headers first
-        local mainHeaderFrame = _G["CLMainHeaderFrame" .. class] or CreateFrame("Frame", "CLMainHeaderFrame" .. class, parent)
+        local mainHeaderFrame = _G["CLMainHeaderFrame" .. class] or
+                                    CreateFrame("Frame",
+                                                "CLMainHeaderFrame" .. class,
+                                                parent)
         mainHeaderFrame:SetSize(contentWidth, 40)
-        mainHeaderFrame:SetPoint("TOPLEFT", layoutConfig.contentPadding, layoutConfig.mainHeadersY)
-        
+        mainHeaderFrame:SetPoint("TOPLEFT", layoutConfig.contentPadding,
+                                 layoutConfig.mainHeadersY)
+
         -- Create Spells Header
         local spellsHeaderName = "CLMainSpellsHeader" .. class
-        local spellsHeader = _G[spellsHeaderName] or mainHeaderFrame:CreateFontString(spellsHeaderName, "OVERLAY", "GameFontNormalLarge")
+        local spellsHeader = _G[spellsHeaderName] or
+                                 mainHeaderFrame:CreateFontString(
+                                     spellsHeaderName, "OVERLAY",
+                                     "GameFontNormalLarge")
         spellsHeader:SetPoint("TOPLEFT", layoutConfig.mainHeaderSpacing, 0)
         spellsHeader:SetText("Spells")
-        
+
         -- Create Talents Header
         local talentsHeaderName = "CLMainTalentsHeader" .. class
-        local talentsHeader = _G[talentsHeaderName] or mainHeaderFrame:CreateFontString(talentsHeaderName, "OVERLAY", "GameFontNormalLarge")
-        talentsHeader:SetPoint("TOPLEFT", floor(contentWidth/2) + layoutConfig.mainHeaderSpacing - 10, 0)
+        local talentsHeader = _G[talentsHeaderName] or
+                                  mainHeaderFrame:CreateFontString(
+                                      talentsHeaderName, "OVERLAY",
+                                      "GameFontNormalLarge")
+        talentsHeader:SetPoint("TOPLEFT", floor(contentWidth / 2) +
+                                   layoutConfig.mainHeaderSpacing - 10, 0)
         talentsHeader:SetText("Talents")
-        
+
         -- Create or get the scroll frame
-        local scrollFrame = _G["CLScrollFrame" .. class] 
+        local scrollFrame = _G["CLScrollFrame" .. class]
         local contentFrame = _G["CLScrollFrame" .. class .. "Content"]
-        
+
         -- Create the scroll frame if it doesn't exist
         if not scrollFrame then
             -- Create scroll frame with visible scrollbar
-            scrollFrame = CreateFrame("ScrollFrame", "CLScrollFrame" .. class, parent, "UIPanelScrollFrameTemplate")
-            scrollFrame:SetPoint("TOPLEFT", layoutConfig.contentPadding, -layoutConfig.topOffset)  -- Position below the headers
+            scrollFrame = CreateFrame("ScrollFrame", "CLScrollFrame" .. class,
+                                      parent, "UIPanelScrollFrameTemplate")
+            scrollFrame:SetPoint("TOPLEFT", layoutConfig.contentPadding,
+                                 -layoutConfig.topOffset) -- Position below the headers
             scrollFrame:SetSize(contentWidth, layoutConfig.columnHeight)
-            
+
             -- Create content frame
-            contentFrame = CreateFrame("Frame", "CLScrollFrame" .. class .. "Content", scrollFrame)
+            contentFrame = CreateFrame("Frame",
+                                       "CLScrollFrame" .. class .. "Content",
+                                       scrollFrame)
             contentFrame:SetSize(contentWidth - 30, 1) -- Width minus scrollbar, height will be set dynamically
             scrollFrame:SetScrollChild(contentFrame)
         else
@@ -737,116 +781,120 @@ local function DoShit()
                 child:Hide()
             end
         end
-        
+
         -- Setup mouse wheel scrolling
         scrollFrame:EnableMouseWheel(true)
         scrollFrame:SetScript("OnMouseWheel", function(self, delta)
             -- Calculate new scroll value
             local newValue = self:GetVerticalScroll() - (delta * 30)
             newValue = max(0, min(newValue, self:GetVerticalScrollRange()))
-            
+
             -- Update scrollBar value
             local scrollBar = _G[self:GetName() .. "ScrollBar"]
             scrollBar:SetValue(newValue)
         end)
-        
+
         -- Set up variables for layout
-        local itemsPerRow = floor((contentWidth - 30) / layoutConfig.iconHorizontalSpacing)
+        local itemsPerRow = floor((contentWidth - 30) /
+                                      layoutConfig.iconHorizontalSpacing)
         local baseTop = -10 -- Starting point within content frame
         local contentTop = baseTop
-        
+
         for specIndex = 1, 3 do
             local spellSpecData = db.data.spells[class][specIndex]
             local talentSpecData = db.data.talents[class][specIndex]
-            
+
             -- Create specialization header
             local specHeaderName = "CLSpecHeader" .. class .. specIndex
-            local specHeader = _G[specHeaderName] or CreateFrame("Frame", specHeaderName, contentFrame)
+            local specHeader = _G[specHeaderName] or
+                                   CreateFrame("Frame", specHeaderName,
+                                               contentFrame)
             specHeader:SetSize(specHeaderWidth, layoutConfig.specHeaderHeight)
             specHeader:SetPoint("TOPLEFT", 10, contentTop)
             specHeader:Show()
-            
+
             -- Create spec icon - positioned first
             local specIconName = "CLSpecIcon" .. class .. specIndex
-            local specIcon = _G[specIconName] or NewButton(specIconName, specHeader, layoutConfig.specIconSize, "Interface\\Icons\\" .. spellSpecData[2], nil, nil, nil, nil, nil, true)
+            local specIcon = _G[specIconName] or
+                                 NewButton(specIconName, specHeader,
+                                           layoutConfig.specIconSize,
+                                           "Interface\\Icons\\" ..
+                                               spellSpecData[2], nil, nil, nil,
+                                           nil, nil, true)
             specIcon:SetPoint("TOPLEFT", 0, 0)
             specIcon:Show()
-            
+
             -- Create labels for specialization
             if not specIcon.label then
-                specIcon.label = specIcon:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-                specIcon.label:SetPoint("LEFT", specIcon, "RIGHT", layoutConfig.specNamePadding, 0)
+                specIcon.label = specIcon:CreateFontString(nil, "OVERLAY",
+                                                           "GameFontNormalLarge")
+                specIcon.label:SetPoint("LEFT", specIcon, "RIGHT",
+                                        layoutConfig.specNamePadding, 0)
                 specIcon.label:SetText(spellSpecData[1])
             end
-            
---[[             -- Add Spells Label (now a subheader for this spec)
-            local spellsLabelName = "CLSpellsLabel" .. class .. specIndex
-            local spellsLabel = _G[spellsLabelName] or specHeader:CreateFontString(spellsLabelName, "OVERLAY", "GameFontNormal")
-            spellsLabel:SetPoint("LEFT", specIcon.label, "RIGHT", layoutConfig.spellLabelOffset, 0)
-            spellsLabel:SetText("Abilities")  -- Changed to "Abilities" to differentiate from main header ]]
-            
---[[             -- Add Talents Label (now a subheader for this spec)
-            local talentsLabelName = "CLTalentsLabel" .. class .. specIndex
-            local talentsLabel = _G[talentsLabelName] or specHeader:CreateFontString(talentsLabelName, "OVERLAY", "GameFontNormal")
-            talentsLabel:SetPoint("LEFT", spellsLabel, "RIGHT", layoutConfig.talentLabelOffset, 0)
-            talentsLabel:SetText("Specialization")  -- Changed to "Specialization" to differentiate from main header ]]
-            
+
             -- Move down for content
             contentTop = contentTop - layoutConfig.contentTopPadding
-            
+
             -- Process Spells Section
             local spellsLeft = 10
             local spellsInRow = 0
             local startingTop = contentTop
-            
+
             -- Apply any class-specific offset for spells
             local spellsOffset = getClassSpecOffset(class, specIndex, 1)
             contentTop = contentTop + spellsOffset
-            
+
             -- Get spells for this specialization
             local spells = spellSpecData[4]
-            
+
             -- Process each spell in this specialization
             for i = 1, #spells do
                 local spellid, levelid = spells[i][1], spells[i][2]
                 local prank, rank, nrank, ranks, spell, nspell, nlevel
                 rank, ranks = 0, #spellid
-    
+
                 for j = 1, ranks do
                     if tContains(spellcheck1, spellid[j]) then
                         rank = j
                     end
                 end
-    
+
                 if rank > 0 then
                     spell = spellid[rank]
                 else
                     rank = 0
                     spell = spellid[1]
                 end
-                
+
                 if rank + 1 <= ranks then
-                    nspell, nlevel, nrank = spellid[rank + 1], levelid[rank + 1], rank + 1
+                    nspell, nlevel, nrank = spellid[rank + 1],
+                                            levelid[rank + 1], rank + 1
                 else
                     nspell, nlevel, nrank = spellid[rank], levelid[rank], rank
                 end
-                
+
                 prank = rank - 1
-    
+
                 -- Create spell button
-                local buttonID = "CLSpellContentClass" .. class .. "Spec" .. specIndex .. "spell" .. i
-                local icon = ({ GetSpellInfo(nspell) })[3]
-                if nspell == 75 then icon = "Interface/Icons/Ability_Whirlwind" end
-                
-                local button = _G[buttonID] or NewButton(buttonID, contentFrame, layoutConfig.iconSize, icon, "true")
+                local buttonID = "CLSpellContentClass" .. class .. "Spec" ..
+                                     specIndex .. "spell" .. i
+                local icon = ({GetSpellInfo(nspell)})[3]
+                if nspell == 75 then
+                    icon = "Interface/Icons/Ability_Whirlwind"
+                end
+
+                local button = _G[buttonID] or
+                                   NewButton(buttonID, contentFrame,
+                                             layoutConfig.iconSize, icon, "true")
                 button:SetButtonState("NORMAL", "true")
                 button:SetPoint("TOPLEFT", spellsLeft, contentTop)
                 button:Show()
-                
+
                 if button:GetAttribute("hrank") == nil or eqtSpell == "true" then
                     button:SetAttribute("hrank", rank)
                 end
-                
+
                 -- Store spell info
                 if spell_point_list[class] == nil then
                     spell_point_list[class] = {}
@@ -855,9 +903,9 @@ local function DoShit()
                     spell_point_list[class][specIndex] = {}
                 end
                 spell_point_list[class][specIndex][icon] = rank
-                
+
                 local hrank = button:GetAttribute("hrank")
-    
+
                 -- Spell status calculation
                 local state, saturated, color, acost, tcost, lock, req, rreq =
                     "normal", 0, GREEN_FONT_COLOR, 1, 0, nil, nil, nil
@@ -865,41 +913,40 @@ local function DoShit()
                 local lcolor, ccolor = color, color
                 local nacost, ntcost = acost, tcost
                 local ncost
-    
-                if rank == 1 and spells[i][4] == 1 then
-                    tcost = 1
-                end
+
+                if rank == 1 and spells[i][4] == 1 then tcost = 1 end
                 if nrank == 1 and spells[i][4] == 1 then
                     ntcost = 1
                 end
-    
-                if rank == ranks then
-                    state = "full"
-                end
-    
+
+                if rank == ranks then state = "full" end
+
                 if state ~= "full" then
                     if UnitLevel("player") < nlevel then
                         state = "disabled"
                         lcolor = RED_FONT_COLOR
                     end
-    
+
                     if ap < nacost or tp < ntcost then
                         state = "disabled"
                         ccolor = RED_FONT_COLOR
                     end
-    
+
                     if db.locks[spell] ~= nil then
                         for h = 1, #db.locks[spell] do
                             if tContains(allspells, db.locks[spell][h]) then
                                 state = "disabled"
-                                lock = 'Locked by "' .. ({ GetSpellInfo(db.locks[spell][h]) })[1] .. '" spell'
+                                lock = 'Locked by "' ..
+                                           ({GetSpellInfo(db.locks[spell][h])})[1] ..
+                                           '" spell'
                                 break
                             end
                         end
                     end
-    
+
                     if db.req[nspell] ~= nil then
-                        local reqs, reqr = ({ GetSpellInfo(db.req[nspell]) })[1], ({ GetSpellInfo(db.req[nspell]) })[2]
+                        local reqs, reqr = ({GetSpellInfo(db.req[nspell])})[1],
+                                           ({GetSpellInfo(db.req[nspell])})[2]
                         if not tContains(allspells, db.req[nspell]) then
                             state = "disabled"
                             req = "req spell '" .. reqs
@@ -911,9 +958,10 @@ local function DoShit()
                         end
                     end
                 end
-    
+
                 if db.rreq[spell] ~= nil then
-                    local rreqs, rreqr = ({ GetSpellInfo(db.rreq[spell]) })[1], ({ GetSpellInfo(db.rreq[spell]) })[2]
+                    local rreqs, rreqr = ({GetSpellInfo(db.rreq[spell])})[1],
+                                         ({GetSpellInfo(db.rreq[spell])})[2]
                     if tContains(allspells, db.rreq[spell]) and rank ~= hrank then
                         state = "req"
                         rreq = "Required for spell '" .. rreqs
@@ -924,11 +972,11 @@ local function DoShit()
                         end
                     end
                 end
-    
+
                 if state == "disabled" and rank > 0 then
                     state = "temp"
                 end
-    
+
                 if state == "disabled" then
                     saturated = 1
                     color = GRAY_FONT_COLOR
@@ -939,26 +987,26 @@ local function DoShit()
                 elseif state == "req" then
                     color = ORANGE_FONT_COLOR
                 end
-                
+
                 button.texture:SetDesaturated(saturated)
                 button.rank:SetVertexColor(color.r, color.g, color.b)
                 button.rank:SetText(rank)
-    
+
                 ncost = "Requires 1 AP"
-                if ntcost == 1 then
-                    ncost = ncost .. ", 1 TP"
-                end
-    
+                if ntcost == 1 then ncost = ncost .. ", 1 TP" end
+
                 local clickable = true
-    
+
                 if state == "normal" and rank > hrank then
                     if nrank <= ranks then
-                        button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+                        button:RegisterForClicks("LeftButtonDown",
+                                                 "RightButtonDown")
                     end
                 end
                 if state == "normal" and rank == hrank then
                     if nrank <= ranks then
-                        button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+                        button:RegisterForClicks("LeftButtonDown",
+                                                 "RightButtonDown")
                     end
                 end
                 if state == "normal" and rank == 0 then
@@ -970,7 +1018,8 @@ local function DoShit()
                 if (state == "full" or state == "temp") and rank == hrank then
                     button:RegisterForClicks("RightButtonDown")
                 end
-                if state == "req" and rank > hrank and nrank <= ranks and rreq ~= nil then
+                if state == "req" and rank > hrank and nrank <= ranks and rreq ~=
+                    nil then
                     if UnitLevel("player") < nlevel then
                         button:RegisterForClicks()
                         clickable = false
@@ -982,38 +1031,39 @@ local function DoShit()
                     button:RegisterForClicks()
                     clickable = false
                 end
-    
+
                 -- Set up spell button click handler
-                button:SetScript(
-                    "OnClick",
-                    function(self, key, down)
-                        if not (button:IsEnabled() and clickable ~= false) then return end
-                        local ap, tap = GetPoints("ap")
-                        local tp, ttp = GetPoints("tp")
-                        if key == "LeftButton" then
-                            if (ap > 0 and UnitLevel("player") >= nlevel) then
-                                if (ntcost == 1) then
-                                    if (tp > 0) then
-                                        TempLearnSpell(nspell, ntcost)
-                                    end
-                                else
+                button:SetScript("OnClick", function(self, key, down)
+                    if not (button:IsEnabled() and clickable ~= false) then
+                        return
+                    end
+                    local ap, tap = GetPoints("ap")
+                    local tp, ttp = GetPoints("tp")
+                    if key == "LeftButton" then
+                        if (ap > 0 and UnitLevel("player") >= nlevel) then
+                            if (ntcost == 1) then
+                                if (tp > 0) then
                                     TempLearnSpell(nspell, ntcost)
                                 end
+                            else
+                                TempLearnSpell(nspell, ntcost)
                             end
                         end
-    
-                        if key == "RightButton" then
-                            TempUnlearnSpell(spell, tcost)
-                        end
-    
-                        FillSpells(class, spec, parent, mode)
-                    end)
-    
-                ButtonTooltip(button, spell, nspell, rank, ranks, nlevel, lcolor, ccolor, state, ncost, lock, req, rreq)
-    
+                    end
+
+                    if key == "RightButton" then
+                        TempUnlearnSpell(spell, tcost)
+                    end
+
+                    FillSpells(class, spec, parent, mode)
+                end)
+
+                ButtonTooltip(button, spell, nspell, rank, ranks, nlevel,
+                lcolor, ccolor, state, ncost, lock, req, rreq, false)  -- false = not a talent
+
                 -- Adjust spell grid position
                 spellsInRow = spellsInRow + 1
-                if spellsInRow >= layoutConfig.iconsPerHalfRow then  -- Half the items per row for two sections
+                if spellsInRow >= layoutConfig.iconsPerHalfRow then -- Half the items per row for two sections
                     spellsLeft = 10
                     contentTop = contentTop - layoutConfig.iconVerticalSpacing
                     spellsInRow = 0
@@ -1021,68 +1071,74 @@ local function DoShit()
                     spellsLeft = spellsLeft + layoutConfig.iconHorizontalSpacing
                 end
             end
-            
+
             -- Calculate the height of the spells section and reset position for talents
             local spellsSectionHeight = startingTop - contentTop
             if spellsInRow > 0 then
-                contentTop = contentTop - layoutConfig.iconVerticalSpacing  -- Complete the row
+                contentTop = contentTop - layoutConfig.iconVerticalSpacing -- Complete the row
             end
-            
+
             -- Reset position for talents section
             contentTop = startingTop
-            
+
             -- Apply any class-specific offset for talents
             local talentsOffset = getClassSpecOffset(class, specIndex, 2)
             contentTop = contentTop + talentsOffset
-            
+
             -- Process Talents Section
-            local talentsLeft = floor(specHeaderWidth/2) + 10  -- Start talents on the right half
+            local talentsLeft = floor(specHeaderWidth / 2) + 10 -- Start talents on the right half
             local talentsInRow = 0
-            
+
             -- Get talents for this specialization
             local talents = talentSpecData[4]
-            
+
             -- Process each talent in this specialization
             for i = 1, #talents do
                 local talentid, levelid = talents[i][1], talents[i][2]
                 local prank, rank, nrank, ranks, talent, ntalent, nlevel
                 rank, ranks = 0, #talentid
-    
+
                 for j = 1, ranks do
                     if tContains(spellcheck2, talentid[j]) then
                         rank = j
                     end
                 end
-    
+
                 if rank > 0 then
                     talent = talentid[rank]
                 else
                     rank = 0
                     talent = talentid[1]
                 end
-                
+
                 if rank + 1 <= ranks then
-                    ntalent, nlevel, nrank = talentid[rank + 1], levelid[rank + 1], rank + 1
+                    ntalent, nlevel, nrank = talentid[rank + 1],
+                                             levelid[rank + 1], rank + 1
                 else
                     ntalent, nlevel, nrank = talentid[rank], levelid[rank], rank
                 end
-                
+
                 prank = rank - 1
-    
+
                 -- Create talent button
-                local buttonID = "CLTalentContentClass" .. class .. "Spec" .. specIndex .. "talent" .. i
-                local icon = ({ GetSpellInfo(ntalent) })[3]
-                if ntalent == 75 then icon = "Interface/Icons/Ability_Whirlwind" end
-                
-                local button = _G[buttonID] or NewButton(buttonID, contentFrame, layoutConfig.iconSize, icon, "true")
+                local buttonID = "CLTalentContentClass" .. class .. "Spec" ..
+                                     specIndex .. "talent" .. i
+                local icon = ({GetSpellInfo(ntalent)})[3]
+                if ntalent == 75 then
+                    icon = "Interface/Icons/Ability_Whirlwind"
+                end
+
+                local button = _G[buttonID] or
+                                   NewButton(buttonID, contentFrame,
+                                             layoutConfig.iconSize, icon, "true")
                 button:SetButtonState("NORMAL", "true")
                 button:SetPoint("TOPLEFT", talentsLeft, contentTop)
                 button:Show()
-                
+
                 if button:GetAttribute("hrank") == nil or eqtTalent == "true" then
                     button:SetAttribute("hrank", rank)
                 end
-                
+
                 -- Store talent info
                 if talent_point_list[class] == nil then
                     talent_point_list[class] = {}
@@ -1091,9 +1147,9 @@ local function DoShit()
                     talent_point_list[class][specIndex] = {}
                 end
                 talent_point_list[class][specIndex][icon] = rank
-                
+
                 local hrank = button:GetAttribute("hrank")
-    
+
                 -- Talent status calculation
                 local state, saturated, color, acost, tcost, lock, req, rreq =
                     "normal", 0, GREEN_FONT_COLOR, 1, 0, nil, nil, nil
@@ -1101,41 +1157,42 @@ local function DoShit()
                 local lcolor, ccolor = color, color
                 local nacost, ntcost = acost, tcost
                 local ncost
-    
+
                 if rank == 1 and talents[i][4] == 1 then
                     tcost = 1
                 end
                 if nrank == 1 and talents[i][4] == 1 then
                     ntcost = 1
                 end
-    
-                if rank == ranks then
-                    state = "full"
-                end
-    
+
+                if rank == ranks then state = "full" end
+
                 if state ~= "full" then
                     if UnitLevel("player") < nlevel then
                         state = "disabled"
                         lcolor = RED_FONT_COLOR
                     end
-    
+
                     if tp < nacost or ap < ntcost then
                         state = "disabled"
                         ccolor = RED_FONT_COLOR
                     end
-    
+
                     if db.locks[talent] ~= nil then
                         for h = 1, #db.locks[talent] do
                             if tContains(allspells, db.locks[talent][h]) then
                                 state = "disabled"
-                                lock = 'Locked by "' .. ({ GetSpellInfo(db.locks[talent][h]) })[1] .. '" talent'
+                                lock = 'Locked by "' ..
+                                           ({GetSpellInfo(db.locks[talent][h])})[1] ..
+                                           '" talent'
                                 break
                             end
                         end
                     end
-    
+
                     if db.req[ntalent] ~= nil then
-                        local reqs, reqr = ({ GetSpellInfo(db.req[ntalent]) })[1], ({ GetSpellInfo(db.req[ntalent]) })[2]
+                        local reqs, reqr = ({GetSpellInfo(db.req[ntalent])})[1],
+                                           ({GetSpellInfo(db.req[ntalent])})[2]
                         if not tContains(allspells, db.req[ntalent]) then
                             state = "disabled"
                             req = "req talent '" .. reqs
@@ -1147,9 +1204,10 @@ local function DoShit()
                         end
                     end
                 end
-    
+
                 if db.rreq[talent] ~= nil then
-                    local rreqs, rreqr = ({ GetSpellInfo(db.rreq[talent]) })[1], ({ GetSpellInfo(db.rreq[talent]) })[2]
+                    local rreqs, rreqr = ({GetSpellInfo(db.rreq[talent])})[1],
+                                         ({GetSpellInfo(db.rreq[talent])})[2]
                     if tContains(allspells, db.rreq[talent]) and rank ~= hrank then
                         state = "req"
                         rreq = "Required for talent '" .. rreqs
@@ -1160,11 +1218,11 @@ local function DoShit()
                         end
                     end
                 end
-    
+
                 if state == "disabled" and rank > 0 then
                     state = "temp"
                 end
-    
+
                 if state == "disabled" then
                     saturated = 1
                     color = GRAY_FONT_COLOR
@@ -1175,26 +1233,26 @@ local function DoShit()
                 elseif state == "req" then
                     color = ORANGE_FONT_COLOR
                 end
-                
+
                 button.texture:SetDesaturated(saturated)
                 button.rank:SetVertexColor(color.r, color.g, color.b)
                 button.rank:SetText(rank)
-    
+
                 ncost = "Requires 1 TP"
-                if ntcost == 1 then
-                    ncost = ncost .. ", 1 AP"
-                end
-    
+                if ntcost == 1 then ncost = ncost .. ", 1 AP" end
+
                 local clickable = true
-    
+
                 if state == "normal" and rank > hrank then
                     if nrank <= ranks then
-                        button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+                        button:RegisterForClicks("LeftButtonDown",
+                                                 "RightButtonDown")
                     end
                 end
                 if state == "normal" and rank == hrank then
                     if nrank <= ranks then
-                        button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+                        button:RegisterForClicks("LeftButtonDown",
+                                                 "RightButtonDown")
                     end
                 end
                 if state == "normal" and rank == 0 then
@@ -1206,7 +1264,8 @@ local function DoShit()
                 if (state == "full" or state == "temp") and rank == hrank then
                     button:RegisterForClicks("RightButtonDown")
                 end
-                if state == "req" and rank > hrank and nrank <= ranks and rreq ~= nil then
+                if state == "req" and rank > hrank and nrank <= ranks and rreq ~=
+                    nil then
                     if UnitLevel("player") < nlevel then
                         button:RegisterForClicks()
                         clickable = false
@@ -1218,63 +1277,67 @@ local function DoShit()
                     button:RegisterForClicks()
                     clickable = false
                 end
-    
+
                 -- Set up talent button click handler
-                button:SetScript(
-                    "OnClick",
-                    function(self, key, down)
-                        if not (button:IsEnabled() and clickable ~= false) then return end
-                        local ap, tap = GetPoints("ap")
-                        local tp, ttp = GetPoints("tp")
-                        if key == "LeftButton" then
-                            if tp > 0 and UnitLevel("player") >= nlevel then
-                                TempLearnTalent(ntalent, ntcost)
-                            end
+                button:SetScript("OnClick", function(self, key, down)
+                    if not (button:IsEnabled() and clickable ~= false) then
+                        return
+                    end
+                    local ap, tap = GetPoints("ap")
+                    local tp, ttp = GetPoints("tp")
+                    if key == "LeftButton" then
+                        if tp > 0 and UnitLevel("player") >= nlevel then
+                            TempLearnTalent(ntalent, ntcost)
                         end
-    
-                        if key == "RightButton" then
-                            TempUnlearnTalent(talent, tcost)
-                        end
-    
-                        FillSpells(class, spec, parent, mode)
-                    end)
-    
-                ButtonTooltip(button, talent, ntalent, rank, ranks, nlevel, lcolor, ccolor, state, ncost, lock, req, rreq)
-    
+                    end
+
+                    if key == "RightButton" then
+                        TempUnlearnTalent(talent, tcost)  
+                    end
+
+                    FillSpells(class, spec, parent, mode)
+                end)
+
+                ButtonTooltip(button, talent, ntalent, rank, ranks, nlevel,
+                lcolor, ccolor, state, ncost, lock, req, rreq, true)  -- true = is a talent
+
                 -- Adjust talent grid position
                 talentsInRow = talentsInRow + 1
-                if talentsInRow >= layoutConfig.iconsPerHalfRow then  -- Half the items per row for two sections
-                    talentsLeft = floor(specHeaderWidth/2) + 10
+                if talentsInRow >= layoutConfig.iconsPerHalfRow then -- Half the items per row for two sections
+                    talentsLeft = floor(specHeaderWidth / 2) + 10
                     contentTop = contentTop - layoutConfig.iconVerticalSpacing
                     talentsInRow = 0
                 else
-                    talentsLeft = talentsLeft + layoutConfig.iconHorizontalSpacing
+                    talentsLeft = talentsLeft +
+                                      layoutConfig.iconHorizontalSpacing
                 end
             end
-            
+
             -- Calculate the talent section height
             local talentsSectionHeight = startingTop - contentTop
             if talentsInRow > 0 then
-                contentTop = contentTop - layoutConfig.iconVerticalSpacing  -- Complete the row
+                contentTop = contentTop - layoutConfig.iconVerticalSpacing -- Complete the row
             end
-            
-            local maxSectionHeight = max(spellsSectionHeight, talentsSectionHeight)
-            
+
+            local maxSectionHeight = max(spellsSectionHeight,
+                                         talentsSectionHeight)
+
             -- Use the maximum section height for spacing
             contentTop = startingTop - maxSectionHeight
-            
+
             -- Add spacing for next specialization
             contentTop = contentTop - layoutConfig.specSpacing
         end
-        
+
         -- Update content frame height
         contentFrame:SetHeight(abs(contentTop) + 20)
     end
-    
-    --Create Main Button
-    local button =
-        _G["CLButton"] or
-        NewButton("CLButton", UIParent, 48, "Interface\\Tooltips\\Book_Icon", nil, nil, nil, nil, nil, true) --Interface\\ICONS\\INV_Enchant_FormulaEpic_01
+
+    -- Create Main Button
+    local button = _G["CLButton"] or
+                       NewButton("CLButton", UIParent, 48,
+                                 "Interface\\Tooltips\\Book_Icon", nil, nil,
+                                 nil, nil, nil, true)
 
     button:SetMovable(true)
     button:EnableMouse(true)
@@ -1286,67 +1349,49 @@ local function DoShit()
     local talentButton = _G["TalentMicroButton"]
 
     talentButton:Enable();
-    talentButton:SetScript(
-        "OnClick",
-        function()
-            FrameToggle("CLMainFrame")
-        end
-    )
+    talentButton:SetScript("OnClick", function() FrameToggle("CLMainFrame") end)
     button:Hide();
 
     AIO.SavePosition(button)
 
-    button.tooltip =
-        _G["CLButtontooltip"] or CreateFrame("GameTooltip", "CLButtontooltip", button, "GameTooltipTemplate")
-    button:SetScript(
-        "OnEnter",
-        function()
-            local ap, tp = GetPoints("ap"), GetPoints("tp")
-            button.tooltip:Hide()
-            button.tooltip:SetOwner(button, "ANCHOR_RIGHT")
-            button.tooltip:AddLine("Distribute your Ability or Talents Points", nil, nil, nil, true)
-            local c = GREEN_FONT_COLOR
-            if ap > 0 or tp > 0 then
-                local string =
-                    "You have\n" ..
-                    ap .. " Ability Points\n" .. tp .. " Talent Points"
-                button.tooltip:AddLine(string, c.r, c.g, c.b, true)
-            end
-            button.tooltip:AddLine("Drag with right button for move", 1, 1, 1, true)
-            button.tooltip:Show()
+    button.tooltip = _G["CLButtontooltip"] or
+                         CreateFrame("GameTooltip", "CLButtontooltip", button,
+                                     "GameTooltipTemplate")
+    button:SetScript("OnEnter", function()
+        local ap, tp = GetPoints("ap"), GetPoints("tp")
+        button.tooltip:Hide()
+        button.tooltip:SetOwner(button, "ANCHOR_RIGHT")
+        button.tooltip:AddLine("Distribute your Ability or Talents Points", nil,
+                               nil, nil, true)
+        local c = GREEN_FONT_COLOR
+        if ap > 0 or tp > 0 then
+            local string = "You have\n" .. ap .. " Ability Points\n" .. tp ..
+                               " Talent Points"
+            button.tooltip:AddLine(string, c.r, c.g, c.b, true)
         end
-    )
-    button:SetScript(
-        "OnLeave",
-        function()
-            button.tooltip:Hide()
-        end
-    )
+        button.tooltip:AddLine("Drag with right button for move", 1, 1, 1, true)
+        button.tooltip:Show()
+    end)
+    button:SetScript("OnLeave", function() button.tooltip:Hide() end)
 
-    button:SetScript(
-        "OnUpdate",
-        function()
-            local ap, tp = GetPoints("ap"), GetPoints("tp")
-            if ap > 0 or tp > 0 then
-                FrameShow(button.flash)
-            else
-                FrameHide(button.flash)
-            end
+    button:SetScript("OnUpdate", function()
+        local ap, tp = GetPoints("ap"), GetPoints("tp")
+        if ap > 0 or tp > 0 then
+            FrameShow(button.flash)
+        else
+            FrameHide(button.flash)
         end
-    )
+    end)
 
     button:RegisterEvent("PLAYER_LEVEL_UP")
-    button:SetScript(
-        "OnEvent",
-        function()
-            local tab = _G["CLMainFrame"]:GetAttribute("tab")
-            if tab ~= 0 then
-                SelectTab(tab, "CLContainer", "CLMainFrame", "CLButton")
-            end
+    button:SetScript("OnEvent", function()
+        local tab = _G["CLMainFrame"]:GetAttribute("tab")
+        if tab ~= 0 then
+            SelectTab(tab, "CLContainer", "CLMainFrame", "CLButton")
         end
-    )
+    end)
 
-    --Create Main Frame
+    -- Create Main Frame
     local frame = CLMainFrame or CreateFrame("Frame", "CLMainFrame", UIParent)
     frame:Hide()
     frame:SetMovable(true)
@@ -1354,150 +1399,127 @@ local function DoShit()
     frame:SetToplevel(true)
 
     frame.titleRegion = frame:CreateTitleRegion()
-    frame.titleRegion:SetSize(967, 24)    -- 600 wide x 24 tall
-    frame.titleRegion:SetPoint("TOPLEFT") -- anchor the titleRegion to top left of frame
-    -- this is the drag bar texture
+    frame.titleRegion:SetSize(967, 24)
+    frame.titleRegion:SetPoint("TOPLEFT")
     frame.titleTexture = frame:CreateTexture("frame_titleTexture", "ARTWORK")
-    frame.titleTexture:SetSize(967, 24) -- texture is the same size as the title drag bar
+    frame.titleTexture:SetSize(967, 24)
     frame.titleTexture:SetPoint("TOPLEFT")
 
     tinsert(UISpecialFrames, "CLMainFrame")
 
     frame:RegisterForDrag("LeftButton")
     frame:SetToplevel(true)
-    frame:SetSize(967, 670) -- 420x680
+    frame:SetSize(967, 670)
     frame:SetPoint("CENTER", 0, 0)
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     frame:SetAttribute("tab", 0)
     frame:SetAttribute("child", "CLContainer")
+    frame:SetClampedToScreen(false)
 
     AIO.SavePosition(frame)
 
     local function TabSelect(frame)
         if (frame == nil) then frame = _G["CLMainFrame"] end
         local tab = frame:GetAttribute("tab")
-        if tab == 0 then
-            tab = 1
-        end
+        if tab == 0 then tab = 1 end
         SelectTab(tab, "CLContainer", "CLMainFrame", "CLButton")
     end
 
-    frame:SetScript(
-        "OnShow",
-        function()
-            TabSelect()
-            UpdatePointText()
+    frame:SetScript("OnShow", function()
+        TabSelect()
+        UpdatePointText()
+    end)
+
+    frame:SetScript("OnHide", function()
+        local tab = frame:GetAttribute("tab")
+        if tab ~= 0 then FrameHide("Container" .. tab) end
+    end)
+
+    frame:SetScript("OnUpdate", function()
+        local ap, tap = GetPoints("ap")
+        local tp, ttp = GetPoints("tp")
+        local string2 = ap
+        if tap > 0 then string2 = string2 .. "(" .. tap .. ")" end
+        string2 = string2 .. " AP         " .. tp
+        if ttp > 0 then string2 = string2 .. "(" .. ttp .. ")" end
+        string2 = string2 .. " TP "
+    
+        if _G["CLMainFramePoints"] ~= nil then
+            CLMainFramePoints.text2:SetText(string2)
         end
-    )
-
-    frame:SetScript(
-        "OnHide",
-        function()
-            local tab = frame:GetAttribute("tab")
-            if tab ~= 0 then
-                FrameHide("Container" .. tab)
-            end
+    
+        -- MODIFIED: Check for changes in both spell and talent arrays regardless of tab
+        local hasChanges = (#spellsplus > 0 or #spellsminus > 0 or 
+                           #tpellsplus > 0 or #tpellsminus > 0 or
+                           #talentsplus > 0 or #talentsminus > 0)
+    
+        if hasChanges then
+            FrameShow("CLResetButtonFrame")
+        else
+            FrameHide("CLResetButtonFrame")
         end
-    )
-
-    frame:SetScript(
-        "OnUpdate",
-        function()
-            local ap, tap = GetPoints("ap")
-            local tp, ttp = GetPoints("tp")
-            -- local string =icons[1].."         "..icons[2].."\n"
-            local string2 = ap
-            if tap > 0 then
-                string2 = string2 .. "(" .. tap .. ")"
-            end
-            -- string = string .. " AP "..icons[1].." " .. tp
-            string2 = string2 .. " AP         " .. tp
-            if ttp > 0 then
-                string2 = string2 .. "(" .. ttp .. ")"
-            end
-            string2 = string2 .. " TP " --..icons[2]
-
-            if _G["CLMainFramePoints"] ~= nil then
-                --	CLMainFramePoints.text:SetText(string)
-                CLMainFramePoints.text2:SetText(string2)
-            end
-
-            local tab = _G["CLMainFrame"]:GetAttribute("tab")
-            if tab ~= nil and tab > 0 then
-                if (tab == 1 and #spellsplus + #spellsminus > 0) or (tab == 2 and #talentsplus + #talentsminus + #tpellsplus + #tpellsminus > 0) then
-                    FrameShow("CLResetButtonFrame")
-                else
-                    FrameHide("CLResetButtonFrame")
-                end
-            end
-        end
-    )
+    end)
 
     -- Close button
-    local button = _G["CLMainFrameClose"] or CreateFrame("Button", "CLMainFrameClose", _G["CLMainFrame"])
+    local button = _G["CLMainFrameClose"] or
+                       CreateFrame("Button", "CLMainFrameClose",
+                                   _G["CLMainFrame"])
     button:SetSize(36, 36)
     button:SetPoint("TOPRIGHT")
     button:SetNormalTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Up")
     button:SetPushedTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Down")
-    button:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
-    button:SetScript(
-        "OnClick",
-        function()
-            FrameHide("CLMainFrame")
-        end
-    )
+    button:SetHighlightTexture(
+        "Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight")
+    button:SetScript("OnClick", function() FrameHide("CLMainFrame") end)
 
     -- AP and TP points
-    local frame = _G["CLMainFramePoints"] or CreateFrame("Frame", "CLMainFramePoints", _G["CLMainFrame"])
+    local frame = _G["CLMainFramePoints"] or
+                      CreateFrame("Frame", "CLMainFramePoints",
+                                  _G["CLMainFrame"])
     frame:SetSize(160, 32)
     frame:SetPoint("TOPLEFT", 25, -30)
-    frame.text = frame:CreateFontString("CLMainFramePointsText", "OVERLAY", "GameFontNormal")
+    frame.text = frame:CreateFontString("CLMainFramePointsText", "OVERLAY",
+                                        "GameFontNormal")
     frame.text:SetTextColor(199 / 255, 42 / 255, 42 / 255)
     CLMainFramePoints.text:SetJustifyV("MIDDLE");
     CLMainFramePoints.text:SetJustifyH("LEFT");
     frame.text:SetPoint("CENTER")
 
-    frame.text2 = frame:CreateFontString("CLMainFramePointsText2", "OVERLAY", "GameFontNormal")
+    frame.text2 = frame:CreateFontString("CLMainFramePointsText2", "OVERLAY",
+                                         "GameFontNormal")
     frame.text2:SetTextColor(204 / 255, 126 / 255, 43 / 255)
     CLMainFramePoints.text2:SetJustifyV("MIDDLE");
     CLMainFramePoints.text2:SetJustifyH("LEFT");
     frame.text2:SetPoint("CENTER")
-    --frame:SetScript("OnUpdate", UpdatePoints)
 
-    -- Learn Confirm and cancel
-    local frame = _G["CLResetFrame"] or CreateFrame("Frame", "CLResetFrame", _G["CLMainFrame"])
-    frame:SetSize(160, 32)
-    frame:SetPoint("BOTTOMRIGHT")
-    --frame:SetScript("OnUpdate", UpdateReset)
+    -- Reset Frame Setup
+    local frame = _G["CLResetFrame"] or
+    CreateFrame("Frame", "CLResetFrame", _G["CLMainFrame"])
+frame:SetSize(160, 32)
+frame:SetPoint("TOPRIGHT", 0, 0)  -- Position at top right with some padding
 
-    local frame = _G["CLResetButtonFrame"] or CreateFrame("Frame", "CLResetButtonFrame", _G["CLResetFrame"])
+    local frame = _G["CLResetButtonFrame"] or
+                      CreateFrame("Frame", "CLResetButtonFrame",
+                                  _G["CLResetFrame"])
     frame:Hide()
     frame:SetSize(160, 32)
     frame:SetPoint("CENTER")
 
-    local frame = _G["CLWipeButtonFrame"] or CreateFrame("Frame", "CLWipeButtonFrame", _G["CLResetFrame"])
+    local frame = _G["CLWipeButtonFrame"] or
+                      CreateFrame("Frame", "CLWipeButtonFrame",
+                                  _G["CLResetFrame"])
     frame:SetSize(32, 32)
     frame:SetPoint("LEFT", 20, 0)
 
-    local button =
-        _G["CLWipeButton"] or
-        NewButton(
-            "CLWipeButton",
-            _G["CLWipeButtonFrame"],
-            36,
-            "Interface\\Tooltips\\Reverse_White",
-            nil
-        )
-    button:SetPoint("BOTTOMRIGHT", 115, -5)
-    button:SetScript(
-        "OnClick",
-        function()
-            if not (button:IsEnabled()) then return end
-            StaticPopup_Show("WIPE_SPELLS")
-        end
-    )
-
+    local button = _G["CLWipeButton"] or
+                       NewButton("CLWipeButton", _G["CLWipeButtonFrame"], 36,
+                                 "Interface\\Tooltips\\Reverse_White", nil)
+    button:SetPoint("BOTTOMLEFT", -836, 5)
+    button:SetScript("OnClick", function()
+        if not (button:IsEnabled()) then return end
+        StaticPopup_Show("WIPE_SPELLS")
+    end)
 
     StaticPopupDialogs["WIPE_SPELLS"] = {
         text = "Please, confirm resetting ALL your spells and talents",
@@ -1505,15 +1527,78 @@ local function DoShit()
         button2 = NO,
         OnAccept = function()
             AIO.Handle(handlerName, "WipeAll", clientSecret)
+
+            -- Clear local data to match server state
+            wipe(db.spells)
+            wipe(db.talents)
+            wipe(db.tpells)
+            wipe(spellsplus)
+            wipe(spellsminus)
+            wipe(talentsplus)
+            wipe(talentsminus)
+            wipe(tpellsplus)
+            wipe(tpellsminus)
+
+            -- Explicitly force update every class counter in both tabs
+            for k, v in pairs(class_list) do
+                for j = 1, 2 do
+                    local classButton = _G["CLContainer" .. j .. "SubButton" ..
+                                            k]
+                    if classButton and classButton.text then
+                        classButton.text:SetText("0") -- No spells after wipe
+                        classButton.text2:SetText("0") -- No talents after wipe
+
+                        -- Also update spec buttons
+                        for i = 1, 3 do
+                            local specButton =
+                                _G["CLContainer" .. j .. "Sub" .. k ..
+                                    "SubButton" .. i]
+                            if specButton then
+                                if specButton.text then
+                                    specButton.text:SetText("0") -- Reset spec spell count
+                                end
+                                if specButton.text2 then
+                                    specButton.text2:SetText("0") -- Reset spec talent count
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- Refresh current tab
             TabSelect()
             StaticPopup_Hide("WIPE_SPELLS")
             UpdatePointText()
+
+            -- Force a refresh of the current visible container
+            local tab = _G["CLMainFrame"]:GetAttribute("tab")
+            if tab ~= 0 then
+                local currentContainer = _G["CLContainer" .. tab]
+                if currentContainer and currentContainer:IsVisible() then
+                    local subTab = currentContainer:GetAttribute("tab")
+                    if subTab ~= 0 then
+                        local subContainer =
+                            _G["CLContainer" .. tab .. "Sub" .. subTab]
+                        if subContainer and subContainer:IsVisible() then
+                            local subSubTab = subContainer:GetAttribute("tab")
+                            if subSubTab ~= 0 then
+                                local subSubContainer =
+                                    _G["CLContainer" .. tab .. "Sub" .. subTab ..
+                                        "Sub" .. subSubTab]
+                                if subSubContainer then
+                                    subSubContainer:Hide()
+                                    subSubContainer:Show()
+                                end
+                            end
+                        end
+                    end
+                end
+            end
         end,
         OnShow = function(self)
             rst = db.reset + 1
-            if (rst > #prices) then
-                rst = #prices
-            end
+            if (rst > #prices) then rst = #prices end
             MoneyFrame_Update(self.moneyFrame, prices[rst]);
         end,
         timeout = 0,
@@ -1523,92 +1608,51 @@ local function DoShit()
         preferredIndex = 3
     }
 
-
-    local frame = _G["CLUnusedButtonFrame"] or CreateFrame("Frame", "CLUnusedButtonFrame", _G["CLResetFrame"])
+    local frame = _G["CLUnusedButtonFrame"] or
+                      CreateFrame("Frame", "CLUnusedButtonFrame",
+                                  _G["CLResetFrame"])
     frame:SetSize(32, 32)
     frame:SetPoint("BOTTOMLEFT", -20, 0)
 
-    local buttons = { "Apply", "Reset" }
+    local buttons = {"Apply", "Reset"}
     for i = 1, #buttons do
-        --buttons:
-        local button = _G["CLResetButton" .. i] or MakeButton("CLResetButton" .. i, _G["CLResetButtonFrame"])
+        local button = _G["CLResetButton" .. i] or
+                           MakeButton("CLResetButton" .. i,
+                                      _G["CLResetButtonFrame"])
         button:SetText(buttons[i])
         button:SetSize(75, 32)
-        button:SetPoint("LEFT", 80 * (i - 1) - 321, 30) --
-        button:SetScript(
-            "OnClick",
-            function()
-                if not (button:IsEnabled()) then return end
-                LearnConfirm(buttons[i], "true")
-            end
-        )
+        
+        -- Position buttons side by side from right to left
+        button:SetPoint("RIGHT", -100 - (-80 * (i - 1)), -38)  
+        
+        button:SetScript("OnClick", function()
+            if not (button:IsEnabled()) then return end
+            LearnConfirm(buttons[i], "true")
+        end)
     end
 
-    --Learn and reset confirm dialogs
-    StaticPopupDialogs["RESET_CONFIRM"] = {
-        text = "Please, confirm resetting.",
-        button1 = "Yes",
-        button2 = "No",
-        OnAccept = function()
-            LearnConfirm("Reset", "true")
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-        preferredIndex = 3
-    }
-
-    --Main Tab buttons, containers
-    local buttons = { "", "" }
+    -- Main Tab buttons, containers
+    local buttons = {"", ""}
     for i = 1, #buttons do
-        --buttons:
---[[         local button = _G["CLButton" .. i] or MakeButton("CLButton" .. i, _G["CLMainFrame"], true)
-        button:SetText(buttons[i])
-        button:SetSize(18, 18)
-        button:SetPoint("TOP", 50 * (i) + 6, -110) --alpha
-        button.norm = button:CreateTexture(nil, "ARTWORK")
-        button.norm:SetTexture("Interface/Buttons/CLCircle")
-        button.norm:SetPoint("CENTER")
-        button.norm:SetSize(30, 30)
-        button:SetNormalTexture(button.norm)
-        button.push = button:CreateTexture(nil, "OVERLAY")
-        button.push:SetTexture("Interface/Buttons/CLCircleActive")
-        button.push:SetPoint("CENTER")
-        button.push:SetSize(30, 30)
-        button:SetPushedTexture(button.push)
-        button:SetScript(
-            "OnClick",
-            function()
-                SelectTab(i, "CLContainer", "CLMainFrame", "CLButton")
-                SelectTab(current_class, "CLContainer" .. i .. "Sub", "CLContainer" .. i, "CLContainer" .. i ..
-                    "SubButton")
-                SelectTab(current_spec, "CLContainer" .. i .. "Sub" .. current_class .. "Sub",
-                    "CLContainer" .. i .. "Sub" .. current_class, "CLContainer" .. i .. "Sub" ..
-                    current_class .. "SubButton")
-            end
-        ) ]]
-        --containers:
-        local frame = _G["CLContainer" .. i] or CreateFrame("Frame", "CLContainer" .. i, _G["CLMainFrame"])
+        -- containers:
+        local frame = _G["CLContainer" .. i] or
+                          CreateFrame("Frame", "CLContainer" .. i,
+                                      _G["CLMainFrame"])
         frame:SetSize(967, 670)
         frame:SetPoint("TOPLEFT")
         frame:SetAttribute("tab", 0)
         frame:SetAttribute("child", "CLContainer" .. i .. "Sub")
         frame:Hide()
-        frame:SetScript(
-            "OnShow",
-            function()
-                local tab = frame:GetAttribute("tab")
-                if tab == 0 then
-                    tab = 1
-                end
-                local child = frame:GetAttribute("child")
-                SelectTab(tab, child, "CLContainer" .. i, child .. "Button")
-            end
-        )
+        frame:SetScript("OnShow", function()
+            local tab = frame:GetAttribute("tab")
+            if tab == 0 then tab = 1 end
+            local child = frame:GetAttribute("child")
+            SelectTab(tab, child, "CLContainer" .. i, child .. "Button")
+        end)
     end
 
-
-    local frame = _G["CLClassesFrame"] or CreateFrame("Frame", "CLClassesFrame", _G["CLMainFrame"])
+    local frame = _G["CLClassesFrame"] or
+                      CreateFrame("Frame", "CLClassesFrame", _G["CLMainFrame"])
     frame:SetSize(967, 670)
     frame:SetPoint("TOPLEFT")
     t = CreateTexture(frame, "BACKGROUND")
@@ -1617,21 +1661,8 @@ local function DoShit()
     frame.background:SetTexture("Interface\\Tooltips\\CLMainFrame")
     frame.background:SetAllPoints()
 
-
-
-    -- frame:SetBackdrop(
-    --   {
-    --     bgFile = "Interface\\TutorialFrame\\TutorialFrameBackground",
-    -- edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    --     tile = true,
-    --     edgeSize = 16,
-    --      tileSize = 16,
-    --      insets = {left = 0, right = 0, top = 2, bottom = 2}
-    --   }
-    --   )
-
     for index = 1, 2 do
-        --Class buttons for spells and talents
+        -- Class buttons for spells and talents
         local i = 1
         local arr
         local mode
@@ -1644,228 +1675,161 @@ local function DoShit()
         end
         for k, v in pairsSort(arr) do
             local class, cnum, inum = k, i, index
-            local button =
-                _G["CLContainer" .. index .. "SubButton" .. i] or
-                NewButton(
-                    "CLContainer" .. index .. "SubButton" .. i,
-                    _G["CLContainer" .. index],
-                    36,
-                    "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
-                    nil,
-                    unpack(CLASS_ICON_TCOORDS[class])
-                )
-            button:SetPoint("TOPLEFT", 50, -54 - 60 * i) --beta
-            button.text = _G["CLContainer" .. index .. "SubButton" .. i .. "Text"] or
-                button:CreateFontString("CLContainer" .. index .. "SubButton" .. i .. "Text", "OVERLAY")
+            local button = _G["CLContainer" .. index .. "SubButton" .. i] or
+                               NewButton(
+                                   "CLContainer" .. index .. "SubButton" .. i,
+                                   _G["CLContainer" .. index], 36,
+                                   "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES",
+                                   nil, unpack(CLASS_ICON_TCOORDS[class]))
+            button:SetPoint("TOPLEFT", 50, -54 - 60 * i)
+            button.text = _G["CLContainer" .. index .. "SubButton" .. i ..
+                              "Text"] or
+                              button:CreateFontString(
+                                  "CLContainer" .. index .. "SubButton" .. i ..
+                                      "Text", "OVERLAY")
             button.text:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
             button.text:SetPoint("CENTER", 50, 0)
-            button.text:SetText(tostring(CountSpellPoints(i, 1) + CountSpellPoints(i, 2) + CountSpellPoints(i, 3)))
+            button.text:SetText(tostring(
+                                    CountSpellPoints(i, 1) +
+                                        CountSpellPoints(i, 2) +
+                                        CountSpellPoints(i, 3)))
             button.text:SetTextColor(186 / 255, 38 / 255, 38 / 255)
             button.texttex = button:CreateTexture(nil, "ARTWORK")
             button.texttex:SetTexture("Interface/Buttons/CLCircleSmall")
             button.texttex:SetPoint("CENTER", button.text, "CENTER")
-            button.text2 = _G["CLContainer" .. index .. "SubButton" .. i .. "Text2"] or
-                button:CreateFontString("CLContainer" .. index .. "SubButton" .. i .. "Text2", "OVERLAY")
+            button.text2 = _G["CLContainer" .. index .. "SubButton" .. i ..
+                               "Text2"] or
+                               button:CreateFontString(
+                                   "CLContainer" .. index .. "SubButton" .. i ..
+                                       "Text2", "OVERLAY")
             button.text2:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
             button.text2:SetPoint("CENTER", 80, 0)
-            button.text2:SetText(tostring(CountTalentPoints(i, 1) + CountTalentPoints(i, 2) + CountTalentPoints(i, 3)))
+            button.text2:SetText(tostring(
+                                     CountTalentPoints(i, 1) +
+                                         CountTalentPoints(i, 2) +
+                                         CountTalentPoints(i, 3)))
             button.text2:SetTextColor(204 / 255, 126 / 255, 43 / 255)
             button.text2tex = button:CreateTexture(nil, "ARTWORK")
             button.text2tex:SetTexture("Interface/Buttons/CLCircleSmall")
             button.text2tex:SetPoint("CENTER", button.text2, "CENTER")
-            button:SetScript(
-                "OnClick",
-                function()
-                    if not (button:IsEnabled()) then return end --delta
-                    current_class = cnum
-                    SelectTab(
-                        cnum,
-                        "CLContainer" .. inum .. "Sub",
-                        "CLContainer" .. inum,
-                        "CLContainer" .. inum .. "SubButton"
-                    )
-                    LastContainerNum = inum
-                end
-            )
+            button:SetScript("OnClick", function()
+                if not (button:IsEnabled()) then return end
+                current_class = cnum
+                SelectTab(cnum, "CLContainer" .. inum .. "Sub",
+                          "CLContainer" .. inum,
+                          "CLContainer" .. inum .. "SubButton")
+                LastContainerNum = inum
+            end)
 
-            local frame =
-                _G["CLContainer" .. index .. "Sub" .. i] or
-                CreateFrame("Frame", "CLContainer" .. index .. "Sub" .. i, _G["CLContainer" .. index])
-            --frame:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8"})
+            local frame = _G["CLContainer" .. index .. "Sub" .. i] or
+                              CreateFrame("Frame",
+                                          "CLContainer" .. index .. "Sub" .. i,
+                                          _G["CLContainer" .. index])
             frame:SetSize(_G["CLContainer" .. index]:GetSize())
             frame:SetPoint("TOPLEFT")
             frame:SetAttribute("tab", 0)
-            frame:SetAttribute("child", "CLContainer" .. index .. "Sub" .. i .. "Sub")
+            frame:SetAttribute("child",
+                               "CLContainer" .. index .. "Sub" .. i .. "Sub")
             frame:Hide()
-            frame:SetScript(
-                "OnShow",
-                function()
-                    local tab = frame:GetAttribute("tab")
-                    if tab == 0 then
-                        tab = 1
-                    end
-                    local child = frame:GetAttribute("child")
-                    SelectTab(tab, child, "CLContainer" .. inum .. "Sub" .. cnum, child .. "Button")
-                end
-            )
+            frame:SetScript("OnShow", function()
+                local tab = frame:GetAttribute("tab")
+                if tab == 0 then tab = 1 end
+                local child = frame:GetAttribute("child")
+                SelectTab(tab, child, "CLContainer" .. inum .. "Sub" .. cnum,
+                          child .. "Button")
+            end)
 
-            --buttons and containers for spells
+            -- buttons and containers for spells
             for j = 1, #arr[class] do
                 local snum = j
---[[                 local button =
-                    _G["CLContainer" .. index .. "Sub" .. i .. "SubButton" .. j] or
-                    NewButton(
-                        "CLContainer" .. index .. "Sub" .. i .. "SubButton" .. j,
-                        _G["CLContainer" .. index .. "Sub" .. i],
-                        36,
-                        "Interface\\Icons\\" .. arr[class][j][2],
-                        nil
-                    ) ]]
-                --[[ button:SetPoint("TOP", 50 * (j) - 20, -30) ]]
-                --[[ button.text = button:CreateFontString(nil, "OVERLAY")
-                button.text:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
-                button.text:SetPoint("CENTER", -10, -35)
-                button.text:SetText(tostring(CountSpellPoints(i, j)))
-                button.text:SetTextColor(186 / 255, 38 / 255, 38 / 255)
-                button.texttex = button:CreateTexture(nil, "ARTWORK")
-                button.texttex:SetTexture("Interface/Buttons/CLCircleSmall")
-                button.texttex:SetPoint("CENTER", button.text, "CENTER")
-                button.text2 = button:CreateFontString(nil, "OVERLAY")
-                button.text2:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
-                button.text2:SetPoint("CENTER", 15, -35)
-                button.text2:SetText(tostring(CountTalentPoints(i, j)))
-                button.text2:SetTextColor(204 / 255, 126 / 255, 43 / 255)
-                button.text2tex = button:CreateTexture(nil, "ARTWORK")
-                button.text2tex:SetTexture("Interface/Buttons/CLCircleSmall")
-                button.text2tex:SetPoint("CENTER", button.text2, "CENTER") ]]
---[[                 button:SetScript(
-                    "OnClick",
-                    function()
-                        if not (button:IsEnabled()) then return end --eta
-                        current_spec = snum
-                        SelectTab(
-                            snum,
-                            "CLContainer" .. inum .. "Sub" .. cnum .. "Sub",
-                            "CLContainer" .. inum .. "Sub" .. cnum,
-                            "CLContainer" .. inum .. "Sub" .. cnum .. "SubButton"
-                        )
-                    end
-                )
- ]]
                 local frame =
                     _G["CLContainer" .. index .. "Sub" .. i .. "Sub" .. j] or
-                    CreateFrame(
-                        "Frame",
-                        "CLContainer" .. index .. "Sub" .. i .. "Sub" .. j,
-                        _G["CLContainer" .. index .. "Sub" .. i]
-                    )
+                        CreateFrame("Frame",
+                                    "CLContainer" .. index .. "Sub" .. i ..
+                                        "Sub" .. j,
+                                    _G["CLContainer" .. index .. "Sub" .. i])
                 frame:SetSize(
                     _G["CLContainer" .. index .. "Sub" .. i]:GetWidth() + 10,
-                    _G["CLContainer" .. index .. "Sub" .. i]:GetHeight() + 35
-                )
+                    _G["CLContainer" .. index .. "Sub" .. i]:GetHeight() + 35)
                 frame:SetPoint("TOP", 200, -145)
-                FrameBackground(frame, "Interface\\TalentFrame\\" .. arr[class][j][3])
+                FrameBackground(frame,
+                                "Interface\\TalentFrame\\" .. arr[class][j][3])
                 FrameLayout(frame, frame:GetWidth(), frame:GetHeight() + 45)
                 frame:Hide()
-                frame:SetScript(
-                    "OnShow",
-                    function()
-                        frame:SetScript(
-                            "OnUpdate",
-                            function()
-                                FillSpells(class, snum, frame, mode)
-                                _G["Zin"] = spell_point_list
-                                frame:SetScript("OnUpdate", nil)
-                            end
-                        )
-                    end
-                )
+                frame:SetScript("OnShow", function()
+                    frame:SetScript("OnUpdate", function()
+                        FillSpells(class, snum, frame, mode)
+                        _G["Zin"] = spell_point_list
+                        frame:SetScript("OnUpdate", nil)
+                    end)
+                end)
             end
 
             i = i + 1
         end
-    end --end of index
+    end -- end of index
 
-
-
-    --ClassLess Bars
+    -- ClassLess Bars
     local frame = CLBarsFrame or CreateFrame("Frame", "CLBarsFrame", UIParent)
     frame:SetMovable(true)
     frame:EnableMouse(true)
     frame:SetToplevel(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetToplevel(true)
-    --frame:SetSize(172, 104)
     frame:SetSize(172, 79)
-    frame:SetBackdrop(
-        {
-            bgFile = "",
-            edgeFile = "",
-            tile = true,
-            edgeSize = 16,
-            tileSize = 32,
-            insets = { left = 5, right = 5, top = 5, bottom = 5 }
-        }
-    )
+    frame:SetBackdrop({
+        bgFile = "",
+        edgeFile = "",
+        tile = true,
+        edgeSize = 16,
+        tileSize = 32,
+        insets = {left = 5, right = 5, top = 5, bottom = 5}
+    })
     frame:SetPoint("CENTER", 0, 0)
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 
     AIO.SavePosition(frame)
 
-    -- local energy={0,1,3,6} -- delete
-    local energy = { 1 }
-    local colors = {
-        -- [0] = {r = 0, g = 0, b = 255}, -- delete
-        [1] = { r = 255, g = 0, b = 0 },
-        -- [3] = {r = 255, g = 255, b = 0} -- delete
-        -- [6]={r=0,g=209,b=255}, -- delete
-    }
+    -- Create an energy bar
+    local energy = 1
+    local colors = {[1] = {r = 255, g = 0, b = 0}}
 
-    for i = 1, #energy do
-        local e = energy[i]
-        local c = colors[e]
-        local bar = CreateFrame("StatusBar", nil, _G["CLBarsFrame"])
-        bar:SetPoint("TOPLEFT", 8, -20 * (i - 1) - 8)
-        bar:SetWidth(116)
-        bar:SetHeight(16)
-        bar:SetStatusBarTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
-        bar:GetStatusBarTexture():SetHorizTile(false)
-        bar:GetStatusBarTexture():SetVertTile(false)
-        bar:SetStatusBarColor(c.r, c.g, c.b)
+    local bar = CreateFrame("StatusBar", nil, _G["CLBarsFrame"])
+    bar:SetPoint("TOPLEFT", 8, -8)
+    bar:SetWidth(116)
+    bar:SetHeight(16)
+    bar:SetStatusBarTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
+    bar:GetStatusBarTexture():SetHorizTile(false)
+    bar:GetStatusBarTexture():SetVertTile(false)
+    bar:SetStatusBarColor(colors[energy].r, colors[energy].g, colors[energy].b)
 
-        bar.bg = bar:CreateTexture(nil, "BACKGROUND")
-        bar.bg:SetTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
-        bar.bg:SetAllPoints(true)
-        -- bar.bg:SetVertexColor(181, 255, 235)
-        bar.bg:SetVertexColor(0, 0, 0)
+    bar.bg = bar:CreateTexture(nil, "BACKGROUND")
+    bar.bg:SetTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
+    bar.bg:SetAllPoints(true)
+    bar.bg:SetVertexColor(0, 0, 0)
 
-        bar.value = bar:CreateFontString(nil, "OVERLAY")
-        bar.value:SetPoint("CENTER")
-        bar.value:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
-        bar.value:SetJustifyH("CENTER")
-        bar.value:SetShadowOffset(1, -1)
-        bar.value:SetTextColor(1, 1, 1)
+    bar.value = bar:CreateFontString(nil, "OVERLAY")
+    bar.value:SetPoint("CENTER")
+    bar.value:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
+    bar.value:SetJustifyH("CENTER")
+    bar.value:SetShadowOffset(1, -1)
+    bar.value:SetTextColor(1, 1, 1)
 
-        bar:SetScript(
-            "Onupdate",
-            function()
-                local pw = UnitPower("player", e) or 0
-                local pwm = UnitPowerMax("player", e) or 100
-                bar:SetMinMaxValues(0, pwm)
-                bar:SetValue(pw)
-                bar.value:SetText(pw .. "/" .. pwm)
-            end
-        )
-    end
-end --End of Doshit
+    bar:SetScript("Onupdate", function()
+        local pw = UnitPower("player", energy) or 0
+        local pwm = UnitPowerMax("player", energy) or 100
+        bar:SetMinMaxValues(0, pwm)
+        bar:SetValue(pw)
+        bar.value:SetText(pw .. "/" .. pwm)
+    end)
+end -- End of InitializeClasslessUI
 
---Main Execution
+-- Main Execution
 local MyHandlers = AIO.AddHandlers(handlerName, {})
 
-
 function MyHandlers.LoadVars(player, spr, tpr, tar, rem, rst, prc, scr, rsd)
-    --Init
+    -- Init
     db.spells = spr
     db.tpells = tpr
     db.talents = tar
@@ -1873,11 +1837,9 @@ function MyHandlers.LoadVars(player, spr, tpr, tar, rem, rst, prc, scr, rsd)
     prices = prc
     if (rsd ~= true) then
         clientSecret = scr
-        DoShit()
+        InitializeClasslessUI()
     end
 end
 
---hook original Talent Frame
-function ToggleTalentFrame()
-    FrameToggle("CLMainFrame")
-end
+-- hook original Talent Frame
+function ToggleTalentFrame() FrameToggle("CLMainFrame") end
