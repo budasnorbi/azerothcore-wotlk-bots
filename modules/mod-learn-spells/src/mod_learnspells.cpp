@@ -258,10 +258,6 @@ public:
                 player->learnSpell(static_cast<uint32_t>(profession.second), false, false);
             }
 
-            for (const auto& spec : classSpecs)
-            {
-                player->SetSkill(static_cast<uint16_t>(spec), 300, 1, 1);
-            }
       
     }
 };
