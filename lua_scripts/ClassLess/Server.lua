@@ -316,9 +316,5 @@ RegisterPlayerEvent(13, function(event, player)
         player:LearnSpellRanks(spell)
     end
 
-    for i = 1, #talents do
-        local spell = talents[i]
-        player:LearnSpellRanks(spell)
-    end
 end
 end)
