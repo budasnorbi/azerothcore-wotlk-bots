@@ -6,6 +6,7 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include <string>
+#include "Spell.h"
 
 using namespace std;
 
@@ -238,9 +239,6 @@ public:
     LearnClasslessDefaults() : PlayerScript("LearnClasslessDefaults") {
         
     }
-
-       
-
     void OnPlayerFirstLogin (Player *player) override
     {
             if(player->GetSession()->IsBot()){
@@ -258,7 +256,8 @@ public:
                 player->learnSpell(static_cast<uint32_t>(profession.second), false, false);
             }
 
-      
+            // Find resources custom spell
+            player->learnSpell(static_cast<uint32_t>(200000), false, false);
     }
 };
 
