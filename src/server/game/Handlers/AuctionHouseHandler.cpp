@@ -158,14 +158,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket &recvData)
         return;
     }
 
-    Creature* creature = GetPlayer()->GetNPCIfCanInteractWith(auctioneer, UNIT_NPC_FLAG_AUCTIONEER);
-    if (!creature)
-    {
-        LOG_DEBUG("network", "WORLD: HandleAuctionSellItem - Unit ({}) not found or you can't interact with him.", auctioneer.ToString());
-        return;
-    }
 
-    AuctionHouseEntry const* auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+    AuctionHouseEntry const* auctionHouseEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(GetPlayer()->GetFaction());
     if (!auctionHouseEntry)
     {
         LOG_DEBUG("network", "WORLD: HandleAuctionSellItem - Unit ({}) has wrong faction.", auctioneer.ToString());
@@ -271,23 +265,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket &recvData)
             AH->houseId = AuctionHouseId::Neutral;
         else
         {
-            CreatureData const *auctioneerData = sObjectMgr->GetCreatureData(creature->GetSpawnId());
-            if (!auctioneerData)
-            {
-                LOG_ERROR("network.opcode", "Data for auctioneer not found ({})", auctioneer.ToString());
-                delete AH;
-                return;
-            }
-
-            CreatureTemplate const *auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id1);
-            if (!auctioneerInfo)
-            {
-                LOG_ERROR("network.opcode", "Non existing auctioneer ({})", auctioneer.ToString());
-                delete AH;
-                return;
-            }
-
-            const AuctionHouseEntry *AHEntry = sAuctionMgr->GetAuctionHouseEntryFromFactionTemplate(auctioneerInfo->faction);
+            const AuctionHouseEntry *AHEntry = sAuctionMgr->GetAuctionHouseEntryFromFactionTemplate(GetPlayer()->GetFaction());
             AH->houseId = AuctionHouseId(AHEntry->houseId);
         }
 
@@ -593,14 +571,6 @@ void WorldSession::HandleAuctionListBidderItems(WorldPacket &recvData)
         outbiddedCount = 0;
     }
 
-    Creature *creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
-    if (!creature)
-    {
-        LOG_DEBUG("network", "WORLD: HandleAuctionListBidderItems - Unit ({}) not found or you can't interact with him.", guid.ToString());
-        recvData.rfinish();
-        return;
-    }
-
     // Arbitrary cap, can be adjusted if needed
     if (outbiddedCount > 1000)
         return;
@@ -609,7 +579,7 @@ void WorldSession::HandleAuctionListBidderItems(WorldPacket &recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(GetPlayer()->GetFaction());
     if (!ahEntry)
         return;
 
@@ -638,15 +608,11 @@ void WorldSession::HandleAuctionListOwnerItems(WorldPacket &recvData)
     recvData >> guid;
     recvData >> listfrom; // not used in fact (this list does not have page control in client)
 
-    Creature *creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
-    if (!creature)
-        return;
-
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(GetPlayer()->GetFaction());
     if (!ahEntry)
         return;
 
@@ -701,15 +667,11 @@ void WorldSession::HandleAuctionListItems(WorldPacket &recvData)
 
     wstrToLower(wsearchedname);
 
-    Creature *creature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_AUCTIONEER);
-    if (!creature)
-        return;
-
     // remove fake death
     if (_player->HasUnitState(UNIT_STATE_DIED))
         _player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
-
-    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(creature->GetFaction());
+       
+    AuctionHouseEntry const *ahEntry = AuctionHouseMgr::GetAuctionHouseEntryFromFactionTemplate(GetPlayer()->GetFaction());
     if (!ahEntry)
         return;
 
