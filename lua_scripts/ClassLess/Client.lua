@@ -178,7 +178,7 @@ end
 local function InitializeClasslessUI()
     -- Table Functions
     local function tRemoveKey(table, key)
-        for i = 1, #table do
+        for i = #table, 1, -1 do  -- Iterate backwards to avoid skip issues
             if table[i] == key then tremove(table, i) end
         end
     end
@@ -463,6 +463,20 @@ local function InitializeClasslessUI()
         -- Force tab 1 to always be shown
         local tab = 1
         SelectTab(tab, "CLContainer", "CLMainFrame", "CLButton")
+
+        if GetSpellBookItemInfo then  -- Check if function exists
+            -- Force full spellbook cache refresh
+            for tab = 1, 2 do  -- Both tabs (General and Profession)
+                for slot = 1, MAX_SPELLS do
+                    GetSpellBookItemInfo(slot, tab)  -- This refreshes the cache
+                end
+            end
+            
+            -- Refresh UI if visible
+            if SpellBookFrame and SpellBookFrame:IsVisible() then
+                SpellBookFrame_Update()
+            end
+        end
     end
 
     ------Fill Spells Functions
@@ -1385,10 +1399,7 @@ local function InitializeClasslessUI()
 
     button:RegisterEvent("PLAYER_LEVEL_UP")
     button:SetScript("OnEvent", function()
-        local tab = _G["CLMainFrame"]:GetAttribute("tab")
-        if tab ~= 0 then
-            SelectTab(tab, "CLContainer", "CLMainFrame", "CLButton")
-        end
+        SelectTab(1, "CLContainer", "CLMainFrame", "CLButton")
     end)
 
     -- Create Main Frame
