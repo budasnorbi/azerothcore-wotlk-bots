@@ -1,0 +1,1 @@
+UPDATE acore_world.mod_auctionhousebot SET maxitems = 25000, minitems = 25000 WHERE auctionhouse = 2 OR auctionhouse = 6 OR auctionhouse = 7 ;

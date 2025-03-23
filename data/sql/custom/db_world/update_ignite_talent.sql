@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `entry`=-11119, `SchoolMask`=0, `SpellFamilyName`=0, `SpellFamilyMask0`=0, `SpellFamilyMask1`=0, `SpellFamilyMask2`=0, `procFlags`=0, `procEx`=2, `procPhase`=0, `ppmRate`=0, `CustomChance`=0, `Cooldown`=0 WHERE `entry`=-11119;
