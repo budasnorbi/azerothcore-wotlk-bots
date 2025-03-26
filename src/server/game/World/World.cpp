@@ -74,6 +74,7 @@
 #include "PoolMgr.h"
 #include "Realm.h"
 #include "ScriptMgr.h"
+#include "ServerMailMgr.h"
 #include "SkillDiscovery.h"
 #include "SkillExtraItems.h"
 #include "SmartAI.h"
@@ -173,10 +174,10 @@ void World::LoadConfigSettings(bool reload)
             LOG_ERROR("server.loading", "World settings reload fail: can't read settings.");
             return;
         }
-    }
 
-    sLog->LoadFromConfig();
-    sMetric->LoadFromConfigs();
+        sLog->LoadFromConfig();
+        sMetric->LoadFromConfigs();
+    }
 
     // Set realm id and enable db logging
     sLog->SetRealmId(realm.Id.Realm);
@@ -928,6 +929,12 @@ void World::LoadConfigSettings(bool reload)
         _int_configs[CONFIG_BATTLEGROUND_SPEED_BUFF_RESPAWN] = 150;
     }
 
+    _int_configs[CONFIG_BATTLEGROUND_WARSONG_FLAGS]                        = sConfigMgr->GetOption<uint32>("Battleground.Warsong.Flags", 3);
+    _int_configs[CONFIG_BATTLEGROUND_ARATHI_CAPTUREPOINTS]                 = sConfigMgr->GetOption<uint32>("Battleground.Arathi.CapturePoints", 1600);
+    _int_configs[CONFIG_BATTLEGROUND_ALTERAC_REINFORCEMENTS]               = sConfigMgr->GetOption<uint32>("Battleground.Alterac.Reinforcements", 600);
+    _int_configs[CONFIG_BATTLEGROUND_ALTERAC_REP_ONBOSSDEATH]              = sConfigMgr->GetOption<uint32>("Battleground.Alterac.ReputationOnBossDeath", 350);
+    _int_configs[CONFIG_BATTLEGROUND_EYEOFTHESTORM_CAPTUREPOINTS]          = sConfigMgr->GetOption<uint32>("Battleground.EyeOfTheStorm.CapturePoints", 1600);
+
     _int_configs[CONFIG_ARENA_MAX_RATING_DIFFERENCE]                = sConfigMgr->GetOption<uint32>("Arena.MaxRatingDifference", 150);
     _int_configs[CONFIG_ARENA_RATING_DISCARD_TIMER]                 = sConfigMgr->GetOption<uint32>("Arena.RatingDiscardTimer", 10 * MINUTE * IN_MILLISECONDS);
     _int_configs[CONFIG_ARENA_PREV_OPPONENTS_DISCARD_TIMER]         = sConfigMgr->GetOption<uint32>("Arena.PreviousOpponentsDiscardTimer", 2 * MINUTE * IN_MILLISECONDS);
@@ -1662,8 +1669,8 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Player Level Dependent Mail Rewards...");
     sObjectMgr->LoadMailLevelRewards();
 
-    LOG_INFO("server.loading", "Load Mail Server Template...");
-    sObjectMgr->LoadMailServerTemplates();
+    LOG_INFO("server.loading", "Load Mail Server definitions...");
+    sServerMailMgr->LoadMailServerTemplates();
 
     // Loot tables
     LoadLootTables();
