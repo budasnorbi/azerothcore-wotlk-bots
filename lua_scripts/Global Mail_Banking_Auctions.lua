@@ -22,9 +22,9 @@ local function HandleChatCommand(event, player, message, type, language)
                 if action == "bank" then
                     player:SendShowBank(player)
                 elseif action == "mail" then
-                    player:SendShowMailBox(player)
+                    player:SendShowMailBox()
                 elseif action == "auction" then
-                    player:SendAuctionMenu(player)
+                    player:SendShowBank(player)
                 end
                 -- Return false to prevent further processing
                 return false
