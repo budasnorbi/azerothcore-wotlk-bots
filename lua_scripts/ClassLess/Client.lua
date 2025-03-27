@@ -466,7 +466,9 @@ local function InitializeClasslessUI()
 
         if GetSpellBookItemInfo then  -- Check if function exists
             -- Force full spellbook cache refresh
-            for tab = 1, 2 do  -- Both tabs (General and Profession)
+            local numTabs = GetNumSpellTabs and GetNumSpellTabs() or 30 
+            
+            for tab = 1, numTabs do  -- Both tabs (General and Profession)
                 for slot = 1, MAX_SPELLS do
                     GetSpellBookItemInfo(slot, tab)  -- This refreshes the cache
                 end

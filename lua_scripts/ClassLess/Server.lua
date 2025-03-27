@@ -168,6 +168,7 @@ function MyHandlers.LearnSpell(player, spr, tpr, clientSecret)
   local spell = spells[guid][i]
   if not tContains(spr, spell) then
     player:RemoveSpell(spell)
+    CharDBQuery("DELETE FROM character_spell WHERE guid = " .. guid .. " AND spell = " .. spell)
   end
 end
 for i = 1, #tpells[guid] do
@@ -177,6 +178,7 @@ for i = 1, #tpells[guid] do
         return
     end
     player:RemoveSpell(spell)
+    CharDBQuery("DELETE FROM character_spell WHERE guid = " .. guid .. " AND spell = " .. spell)
   end
 end
     spells[guid] = spr
