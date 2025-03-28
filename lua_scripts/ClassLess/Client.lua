@@ -334,15 +334,15 @@ local function InitializeClasslessUI()
     function GetPoints(type)
         if type == "ap" then
             local ap = math.floor(UnitLevel("player")) - #db.spells
-            local tap = #spellsplus
+            local tap = #spellsplus - #spellsminus  -- Account for pending unlearns
             return ap - tap, tap
         end
-
+    
         if type == "tp" then
             local tp = UnitLevel("player") - 9
             if tp < 0 then tp = 0 end
             tp = tp - (#db.talents + #db.tpells)
-            local ttp = #talentsplus + #tpellsplus
+            local ttp = #talentsplus + #tpellsplus - #talentsminus - #tpellsminus  -- Account for pending unlearns
             return tp - ttp, ttp
         end
         return 0, 0
@@ -434,6 +434,8 @@ local function InitializeClasslessUI()
                     end
                 end
             end
+
+          
         elseif action == "Reset" and state == "true" then
             -- Reset all pending changes regardless of tab
             wipe(spellsplus)
@@ -466,9 +468,7 @@ local function InitializeClasslessUI()
 
         if GetSpellBookItemInfo then  -- Check if function exists
             -- Force full spellbook cache refresh
-            local numTabs = GetNumSpellTabs and GetNumSpellTabs() or 30 
-            
-            for tab = 1, numTabs do  -- Both tabs (General and Profession)
+            for tab = 1, 2 do  -- Both tabs (General and Profession)
                 for slot = 1, MAX_SPELLS do
                     GetSpellBookItemInfo(slot, tab)  -- This refreshes the cache
                 end
@@ -1309,6 +1309,7 @@ local function InitializeClasslessUI()
 
                     if key == "RightButton" then
                         TempUnlearnTalent(talent, tcost)  
+                        
                     end
 
                     FillSpells(class, spec, parent, mode)
