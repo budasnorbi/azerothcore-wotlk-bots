@@ -63,7 +63,7 @@ ARG CCACHE_LOGFILE=""
 RUN apt-get update                                                     \
     && apt-get install -y --no-install-recommends                         \
         build-essential ccache libtool cmake-data make cmake clang    \
-        git lsb-base curl unzip default-mysql-client openssl                  \
+        git lsb-base curl unzip default-mysql-client openssl       \
         default-libmysqlclient-dev libboost-all-dev libssl-dev libmysql++-dev \
         libreadline-dev zlib1g-dev libbz2-dev libncurses5-dev         \
     && rm -rf /var/lib/apt/lists/*
@@ -101,6 +101,9 @@ RUN --mount=type=cache,target=/ccache,sharing=locked \
        -DBoost_USE_STATIC_LIBS="ON"                    \
     && cmake --build . --config "$CTYPE" -j $(($(nproc) + 1)) \
     && cmake --install . --config "$CTYPE"
+
+COPY lua_scripts /azerothcore/build/lua_scripts
+COPY configs /azerothcore/env/dist/etc/
 
 #############################
 # Base runtime for services #
@@ -219,7 +222,7 @@ LABEL description="AzerothCore client-data"
 ENV DATAPATH=/azerothcore/env/dist/data
 
 RUN apt-get update && \
-    apt-get install -y curl unzip && \
+    apt-get install -y curl unzip git git-lfs && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --chown=$DOCKER_USER:$DOCKER_USER apps apps

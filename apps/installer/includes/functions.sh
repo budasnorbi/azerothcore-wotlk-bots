@@ -250,4 +250,8 @@ function inst_download_client_data {
         && echo "unzip downloaded file in $path..." && unzip -q -o "$zipPath" -d "$path/" \
         && echo "Remove downloaded file" && rm "$zipPath" \
         && echo "INSTALLED_VERSION=$VERSION" > "$dataVersionFile"
+
+    echo "Cloning DBC repository..."
+    rm -rf "${DATAPATH_ZIP:-"$path/dbc"}"
+    git clone https://github.com/budasnorbi/azerothcore-wotlk-bots-dbc.git "${DATAPATH_ZIP:-"$path/dbc"}"
 }
