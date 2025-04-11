@@ -26,6 +26,29 @@ services:
       timeout: 10s
       retries: 40
 
+  db-backup:
+    image: mysql:8.4
+    container_name: ac-database-backup
+    networks:
+      - ac-network
+    volumes:
+      - ./backups:/backups
+      - ./backup-script/backup.sh:/backup.sh
+    command: /backup.sh
+    depends_on:
+      ac-database:
+        condition: service_healthy
+      ac-db-import:
+        condition: service_completed_successfully
+      ac-client-data-init:
+        condition: service_completed_successfully
+    environment:
+      - MYSQL_HOST=ac-database
+      - MYSQL_ROOT_PASSWORD=${DOCKER_DB_ROOT_PASSWORD:-password}
+      - BACKUP_SCHEDULE=${BACKUP_CRON:-0 */1 * * *}  # Run every hour
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7} # Keep backups for 7 days by default
+    restart: unless-stopped
+
   ac-db-import:
     container_name: ac-db-import
     image: acore/ac-wotlk-db-import:${DOCKER_IMAGE_TAG:-master}
@@ -88,11 +111,10 @@ services:
       # client data
       - ${DOCKER_VOL_DATA:-ac-client-data}:/azerothcore/env/dist/data/:ro
       - ./modules:/azerothcore/modules
+      - ./lua_scripts:/azerothcore/lua_scripts
     depends_on:
       ac-database:
         condition: service_healthy
-      ac-db-import:
-        condition: service_completed_successfully
       ac-client-data-init:
         condition: service_completed_successfully
 
@@ -209,12 +231,15 @@ services:
       ac-database:
         condition: service_healthy
 
+
 volumes:
   ac-database:
   ac-client-data:
+    name: ac-database-data
   # Used for dev server
   ac-build-dev:
   ac-ccache-dev:
 
 networks:
   ac-network:
+    driver: bridge

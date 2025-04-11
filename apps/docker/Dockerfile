@@ -102,7 +102,6 @@ RUN --mount=type=cache,target=/ccache,sharing=locked \
     && cmake --build . --config "$CTYPE" -j $(($(nproc) + 1)) \
     && cmake --install . --config "$CTYPE"
 
-COPY lua_scripts /azerothcore/build/lua_scripts
 COPY configs /azerothcore/env/dist/etc/
 
 #############################

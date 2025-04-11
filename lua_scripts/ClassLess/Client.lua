@@ -71,13 +71,13 @@ local layoutConfig = {
 -- Data
 if AIO.IsServer() then
     -- Spells
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\spells.data", "spells")
+    AIO.AddAddon("lua_scripts/ClassLess/data/spells.data", "spells")
     -- Talents
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\talents.data", "talents")
+    AIO.AddAddon("lua_scripts/ClassLess/data/talents.data", "talents")
     -- Locks
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\locks.data", "locks")
+    AIO.AddAddon("lua_scripts/ClassLess/data/locks.data", "locks")
     -- Requirements
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\req.data", "req")
+    AIO.AddAddon("lua_scripts/ClassLess/data/req.data", "req")
 end
 
 if AIO.AddAddon() then return end
