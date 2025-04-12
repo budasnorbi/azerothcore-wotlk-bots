@@ -333,7 +333,7 @@ local function InitializeClasslessUI()
     -- Utility Functions
     function GetPoints(type)
         if type == "ap" then
-            local ap = math.floor(UnitLevel("player")) - #db.spells
+            local ap = math.floor(UnitLevel("player") / 2) - #db.spells
             local tap = #spellsplus - #spellsminus  -- Account for pending unlearns
             return ap - tap, tap
         end
