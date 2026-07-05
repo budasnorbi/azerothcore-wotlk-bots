@@ -1,14 +1,14 @@
 /*
  * This file is part of the AzerothCore Project. See AUTHORS file for Copyright information
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
@@ -16,13 +16,16 @@
  */
 
 #include "ServerMailMgr.h"
+#include "AccountMgr.h"
 #include "AchievementMgr.h"
+#include "Common.h"
 #include "DatabaseEnv.h"
 #include "Item.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "QuestDef.h"
+#include "RaceMgr.h"
 #include "SharedDefines.h"
 #include "Timer.h"
 
@@ -38,8 +41,8 @@ void ServerMailMgr::LoadMailServerTemplates()
 
     _serverMailStore.clear(); // for reload case
 
-    //                                                    0     1         2         3          4       5
-    QueryResult result = CharacterDatabase.Query("SELECT `id`, `moneyA`, `moneyH`, `subject`, `body`, `active` FROM `mail_server_template`");
+    //                                                    0     1              2         3         4          5       6
+    QueryResult result = CharacterDatabase.Query("SELECT `id`, `senderEntry`, `moneyA`, `moneyH`, `subject`, `body`, `active` FROM `mail_server_template`");
     if (!result)
     {
         LOG_INFO("server.loading", ">> Loaded 0 server mail rewards. DB table `mail_server_template` is empty.");
@@ -57,11 +60,12 @@ void ServerMailMgr::LoadMailServerTemplates()
 
         ServerMail& servMail = _serverMailStore[id];
         servMail.id          = id;
-        servMail.moneyA      = fields[1].Get<uint32>();
-        servMail.moneyH      = fields[2].Get<uint32>();
-        servMail.subject     = fields[3].Get<std::string>();
-        servMail.body        = fields[4].Get<std::string>();
-        servMail.active      = fields[5].Get<uint8>();
+        servMail.senderEntry = fields[1].Get<uint32>();
+        servMail.moneyA      = fields[2].Get<uint32>();
+        servMail.moneyH      = fields[3].Get<uint32>();
+        servMail.subject     = fields[4].Get<std::string>();
+        servMail.body        = fields[5].Get<std::string>();
+        servMail.active      = fields[6].Get<uint8>();
 
         // Skip non-activated entries
         if (!servMail.active)
@@ -71,6 +75,12 @@ void ServerMailMgr::LoadMailServerTemplates()
         {
             LOG_ERROR("sql.sql", "Table `mail_server_template` has moneyA {} or moneyH {} larger than MAX_MONEY_AMOUNT {} for id {}, skipped.", servMail.moneyA, servMail.moneyH, MAX_MONEY_AMOUNT, servMail.id);
             continue;
+        }
+
+        if (servMail.senderEntry && !sObjectMgr->GetCreatureTemplate(servMail.senderEntry))
+        {
+            LOG_ERROR("sql.sql", "Table `mail_server_template` has invalid senderEntry {} (no matching creature_template) for id {}, falling back to default sender.", servMail.senderEntry, servMail.id);
+            servMail.senderEntry = 0;
         }
     } while (result->NextRow());
 
@@ -240,21 +250,28 @@ void ServerMailMgr::LoadMailServerTemplatesConditions()
         case ServerMailConditionType::Faction:
             if (conditionValue < TEAM_ALLIANCE || conditionValue > TEAM_HORDE)
             {
-                LOG_ERROR("sql.sql", "Table `mail_server_template_conditions` has conditionType 'Faction' with invalid conditionValue ({}) for templateID {}, skipped.", conditionState, templateID);
+                LOG_ERROR("sql.sql", "Table `mail_server_template_conditions` has conditionType 'Faction' with invalid conditionValue ({}) for templateID {}, skipped.", conditionValue, templateID);
                 continue;
             }
             break;
         case ServerMailConditionType::Race:
-            if (conditionValue & ~RACEMASK_ALL_PLAYABLE)
+            if (conditionValue & ~sRaceMgr->GetPlayableRaceMask())
             {
-                LOG_ERROR("sql.sql", "Table `mail_server_template_conditions` has conditionType 'Race' with invalid conditionValue ({}) for templateID {}, skipped.", conditionState, templateID);
+                LOG_ERROR("sql.sql", "Table `mail_server_template_conditions` has conditionType 'Race' with invalid conditionValue ({}) for templateID {}, skipped.", conditionValue, templateID);
                 continue;
             }
             break;
         case ServerMailConditionType::Class:
             if (conditionValue & ~CLASSMASK_ALL_PLAYABLE)
             {
-                LOG_ERROR("sql.sql", "Table `mail_server_template_conditions` has conditionType 'Class' with invalid conditionValue ({}) for templateID {}, skipped.", conditionState, templateID);
+                LOG_ERROR("sql.sql", "Table `mail_server_template_conditions` has conditionType 'Class' with invalid conditionValue ({}) for templateID {}, skipped.", conditionValue, templateID);
+                continue;
+            }
+            break;
+        case ServerMailConditionType::AccountFlags:
+            if ((conditionValue & ~ACCOUNT_FLAGS_ALL) != 0)
+            {
+                LOG_ERROR("sql.sql", "Table `mail_server_template_conditions` has conditionType 'AccountFlags' with invalid conditionValue ({}) for templateID {}, skipped.", conditionValue, templateID);
                 continue;
             }
             break;
@@ -271,7 +288,7 @@ void ServerMailMgr::LoadMailServerTemplatesConditions()
     } while (result->NextRow());
 }
 
-void ServerMailMgr::SendServerMail(Player* player, uint32 id, uint32 money,
+void ServerMailMgr::SendServerMail(Player* player, uint32 id, uint32 senderEntry, uint32 money,
     std::vector<ServerMailItems> const& items,
     std::vector<ServerMailCondition> const& conditions,
     std::string const& subject, std::string const& body) const
@@ -282,7 +299,9 @@ void ServerMailMgr::SendServerMail(Player* player, uint32 id, uint32 money,
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
-    MailSender sender(MAIL_NORMAL, player->GetGUID().GetCounter(), MAIL_STATIONERY_GM);
+    MailSender sender = senderEntry
+        ? MailSender(MAIL_CREATURE, senderEntry, MAIL_STATIONERY_DEFAULT)
+        : MailSender(MAIL_NORMAL, player->GetGUID().GetCounter(), MAIL_STATIONERY_GM);
     MailDraft draft(subject, body);
 
     draft.AddMoney(money);
@@ -344,6 +363,8 @@ bool ServerMailCondition::CheckCondition(Player* player) const
         return (player->getRaceMask() & value) != 0;
     case ServerMailConditionType::Class:
         return (player->getClassMask() & value) != 0;
+    case ServerMailConditionType::AccountFlags:
+        return player->GetSession()->HasAccountFlag(value);
     default:
         [[unlikely]] LOG_ERROR("server.mail", "Unknown server mail condition type '{}'", static_cast<uint32>(type));
         return false;

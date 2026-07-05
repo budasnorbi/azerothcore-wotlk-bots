@@ -1,14 +1,14 @@
 /*
  * This file is part of the AzerothCore Project. See AUTHORS file for Copyright information
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
@@ -58,16 +58,6 @@ enum BattlegroundDesertionType : uint8
     ARENA_DESERTION_TYPE_LEAVE_QUEUE     = 6, // player is invited to join arena and refuses to do it
     ARENA_DESERTION_TYPE_NO_ENTER_BUTTON = 7, // player is invited to join arena and do nothing (time expires)
     ARENA_DESERTION_TYPE_INVITE_LOGOUT   = 8, // player is invited to join arena and logs out
-};
-
-enum BattlegroundMaps
-{
-    MAP_BG_ALTERAC_VALLEY           = 30,
-    MAP_BG_WARSONG_GULCH            = 489,
-    MAP_BG_ARATHI_BASIN             = 529,
-    MAP_BG_EYE_OF_THE_STORM         = 566,
-    MAP_BG_STRAND_OF_THE_ANCIENTS   = 607,
-    MAP_BG_ISLE_OF_CONQUEST         = 628
 };
 
 enum BattlegroundBroadcastTexts
@@ -269,11 +259,21 @@ public:
         IP = ip;
     }
 
+    void SaveStats(uint32 damageDone, uint32 healingDone, uint32 killingBlows)
+    {
+        DamageDone = damageDone;
+        HealingDone = healingDone;
+        KillingBlows = killingBlows;
+    }
+
     std::string Name{};
     ObjectGuid::LowType Guid{0};
     uint32 Acc{0};
     uint32 ArenaTeamId{0};
     std::string IP{};
+    uint32 DamageDone{0};
+    uint32 HealingDone{0};
+    uint32 KillingBlows{0};
 };
 
 enum BGHonorMode
@@ -624,6 +624,9 @@ protected:
     void _ProcessLeave(uint32 diff);
     void _ProcessJoin(uint32 diff);
     void _CheckSafePositions(uint32 diff);
+
+    // Setup completion marker
+    bool m_SetupCompleted;
 
     // Scorekeeping
     BattlegroundScoreMap PlayerScores;                // Player scores

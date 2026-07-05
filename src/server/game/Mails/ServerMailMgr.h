@@ -1,14 +1,14 @@
 /*
  * This file is part of the AzerothCore Project. See AUTHORS file for Copyright information
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
@@ -53,6 +53,7 @@ enum class ServerMailConditionType : uint8
     Faction     = 6, ///< Requires the player to be a part of a specific faction. Horde/Alliance.
     Race        = 7, ///< Requires the player to be a specific race.
     Class       = 8, ///< Requires the player to be a specific class.
+    AccountFlags = 9, ///< Requires the player to have a specific AccountFlag (bit)
 };
 
 /**
@@ -67,7 +68,8 @@ constexpr std::pair<std::string_view, ServerMailConditionType> ServerMailConditi
     { "Reputation",  ServerMailConditionType::Reputation  },
     { "Faction",     ServerMailConditionType::Faction     },
     { "Race",        ServerMailConditionType::Race        },
-    { "Class",       ServerMailConditionType::Class       }
+    { "Class",       ServerMailConditionType::Class       },
+    { "AccountFlags", ServerMailConditionType::AccountFlags }
 };
 
 /**
@@ -126,6 +128,7 @@ struct ServerMail
 {
     ServerMail() = default;
     uint32 id{ 0 };
+    uint32 senderEntry{ 0 }; ///< Entry from creature_template. 0 for default "Customer Support" sender.
     uint32 moneyA{ 0 };
     uint32 moneyH{ 0 };
     std::string subject;
@@ -203,6 +206,7 @@ public:
      *
      * @param player The recipient player.
      * @param id The template ID.
+     * @param senderEntry Entry from creature_template. 0 for default "Customer Support" sender.
      * @param money Money reward.
      * @param items List of items to include in the mail.
      * @param conditions List of the conditions for the mail.
@@ -210,7 +214,7 @@ public:
      * @param body Mail body.
      * @param active Whether the mail template is active.
      */
-    void SendServerMail(Player* player, uint32 id, uint32 money, std::vector<ServerMailItems> const& items, std::vector<ServerMailCondition> const& conditions, std::string const& subject, std::string const& body) const;
+    void SendServerMail(Player* player, uint32 id, uint32 senderEntry, uint32 money, std::vector<ServerMailItems> const& items, std::vector<ServerMailCondition> const& conditions, std::string const& subject, std::string const& body) const;
 
     /**
      * @brief Retrieves the entire server mail store.
