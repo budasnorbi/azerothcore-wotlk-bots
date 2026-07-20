@@ -272,26 +272,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket &recvData)
         if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
             AH->houseId = AuctionHouseId::Neutral;
         else
-        {
-            CreatureData const* auctioneerData = sObjectMgr->GetCreatureData(creature->GetSpawnId());
-            if (!auctioneerData)
-            {
-                LOG_ERROR("network.opcode", "Data for auctioneer not found ({})", auctioneer.ToString());
-                delete AH;
-                return;
-            }
-
-            CreatureTemplate const* auctioneerInfo = sObjectMgr->GetCreatureTemplate(auctioneerData->id);
-            if (!auctioneerInfo)
-            {
-                LOG_ERROR("network.opcode", "Non existing auctioneer ({})", auctioneer.ToString());
-                delete AH;
-                return;
-            }
-
-            const AuctionHouseEntry* AHEntry = sAuctionMgr->GetAuctionHouseEntryFromFactionTemplate(auctioneerInfo->faction);
-            AH->houseId = AuctionHouseId(AHEntry->houseId);
-        }
+            AH->houseId = AuctionHouseId(auctionHouseEntry->houseId);
 
         // Required stack size of auction matches to current item stack size, just move item to auctionhouse
         if (itemsCount == 1 && item->GetCount() == count[i])

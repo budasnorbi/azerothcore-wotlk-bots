@@ -13,6 +13,11 @@ local current_class = 1
 local current_spec = 1
 local prices = {}
 
+-- Talent-point cost of a signature ability (a flag-1 entry in spells.data).
+-- These are single-rank, autorank to full, and every one of them is unlocked by
+-- level 60, so at 1 TP they were strictly cheaper than a multi-rank passive.
+local signatureCost = 3
+
 -- Ready-to-use for the system
 local classes = {
     "Druid", "Hunter", "Mage", "Paladin", "Priest", "Rogue", "Shaman",
@@ -107,6 +112,17 @@ local function CountTalentPoints(c, s)
     return r
 end
 
+-- TP spent on signature abilities (flag-1 spells) for this class/spec
+local function CountSignaturePoints(c, s)
+    local r = 0
+    for k, v in pairs(db.data.spells[class_list[c]][s][4]) do
+        if v[4] == 1 and tContains(db.tpells, v[1][1]) then
+            r = r + signatureCost
+        end
+    end
+    return r
+end
+
 local function UpdatePointText()
     for k, v in pairs(class_list) do
         local cap = 0
@@ -114,7 +130,7 @@ local function UpdatePointText()
         for i = 1, 3 do
             local ap = CountSpellPoints(k, i)
             cap = cap + ap
-            local tp = CountTalentPoints(k, i)
+            local tp = CountTalentPoints(k, i) + CountSignaturePoints(k, i)
             ctp = ctp + tp
             for j = 1, 2 do
                 _G["CLContainer" .. j .. "Sub" .. k .. "SubButton" .. i].text:SetText(
@@ -341,8 +357,10 @@ local function InitializeClasslessUI()
         if type == "tp" then
             local tp = UnitLevel("player") - 9
             if tp < 0 then tp = 0 end
-            tp = tp - (#db.talents + #db.tpells)
-            local ttp = #talentsplus + #tpellsplus - #talentsminus - #tpellsminus  -- Account for pending unlearns
+            -- Talents cost 1 TP per rank; signature abilities cost signatureCost each
+            tp = tp - (#db.talents + (#db.tpells * signatureCost))
+            local ttp = #talentsplus - #talentsminus +
+                            ((#tpellsplus - #tpellsminus) * signatureCost)  -- Account for pending unlearns
             return tp - ttp, ttp
         end
         return 0, 0
@@ -428,7 +446,8 @@ local function InitializeClasslessUI()
     
                         local ctp = 0
                         for i = 1, 3 do
-                            ctp = ctp + CountTalentPoints(k, i)
+                            ctp = ctp + CountTalentPoints(k, i) +
+                                      CountSignaturePoints(k, i)
                         end
                         classButton.text2:SetText(tostring(ctp))
                     end
@@ -489,7 +508,7 @@ local function InitializeClasslessUI()
         if not tContains(spellsplus, spell) then
             tinsert(spellsplus, spell)
         end
-        if talent == 1 then
+        if talent > 0 then
             if tContains(tpellsminus, spell) then
                 tRemoveKey(tpellsminus, spell)
             end
@@ -506,7 +525,7 @@ local function InitializeClasslessUI()
         if not tContains(spellsminus, spell) then
             tinsert(spellsminus, spell)
         end
-        if talent == 1 then
+        if talent > 0 then
             if tContains(tpellsplus, spell) then
                 tRemoveKey(tpellsplus, spell)
             end
@@ -930,9 +949,11 @@ local function InitializeClasslessUI()
                 local nacost, ntcost = acost, tcost
                 local ncost
 
-                if rank == 1 and spells[i][4] == 1 then tcost = 1 end
+                if rank == 1 and spells[i][4] == 1 then
+                    tcost = signatureCost
+                end
                 if nrank == 1 and spells[i][4] == 1 then
-                    ntcost = 1
+                    ntcost = signatureCost
                 end
 
                 if rank == ranks then state = "full" end
@@ -1009,7 +1030,9 @@ local function InitializeClasslessUI()
                 button.rank:SetText(rank)
 
                 ncost = "Requires 1 AP"
-                if ntcost == 1 then ncost = ncost .. ", 1 TP" end
+                if ntcost > 0 then
+                    ncost = ncost .. ", " .. ntcost .. " TP"
+                end
 
                 local clickable = true
 
@@ -1057,8 +1080,8 @@ local function InitializeClasslessUI()
                     local tp, ttp = GetPoints("tp")
                     if key == "LeftButton" then
                         if (ap > 0 and UnitLevel("player") >= nlevel) then
-                            if (ntcost == 1) then
-                                if (tp > 0) then
+                            if (ntcost > 0) then
+                                if (tp >= ntcost) then
                                     TempLearnSpell(nspell, ntcost)
                                 end
                             else

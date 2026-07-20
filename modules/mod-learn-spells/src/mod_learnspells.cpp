@@ -200,7 +200,11 @@ public:
     LearnClasslessDefaults() : PlayerScript("LearnClasslessDefaults") {
         
     }
-    void OnPlayerFirstLogin (Player *player) override
+    // Granted at character creation rather than first login: the player is not in world
+    // yet, so neither addSpell nor the skill-reward spells learned inside SetSkill send
+    // SMSG_LEARNED_SPELL. That packet is what makes the client auto-place a spell on the
+    // first free action button. The spells reach the client in the initial spell list.
+    void OnPlayerCreate (Player *player) override
     {
             if(player->GetSession()->IsBot()){
                 return;
@@ -208,17 +212,17 @@ public:
             for (const auto& skills : autoLearnSkills)
             {
                 player->SetSkill(static_cast<uint16_t>(skills.first), 5, 1, 5);
-                player->learnSpell(static_cast<uint32_t>(skills.second), false, false);
+                player->addSpell(static_cast<uint32_t>(skills.second), SPEC_MASK_ALL, true);
             }
 
             for (const auto& profession : autoLearnProfessions)
             {
                 player->SetSkill(static_cast<uint16_t>(profession.first), 75, 1, 1);
-                player->learnSpell(static_cast<uint32_t>(profession.second), false, false);
+                player->addSpell(static_cast<uint32_t>(profession.second), SPEC_MASK_ALL, true);
             }
 
             // Find resources custom spell
-            player->learnSpell(static_cast<uint32_t>(200000), false, false);
+            player->addSpell(static_cast<uint32_t>(200000), SPEC_MASK_ALL, true);
     }
 };
 
