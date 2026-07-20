@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"D:/Servers/mysql-8.4.4-winx64/bin/mysql.exe\" -h127.0.0.1 -P3306 -uacore -pacore -N -e \"SHOW DATABASES;\")",
+      "Read(//d/Games/wow-wotlk-classless/Interface/FrameXML/Paragon/**)",
+      "Bash(cp Paragon_Interface.lua \"/d/Games/wow-wotlk-classless/Interface/FrameXML/Paragon/Paragon_Interface.lua\")",
+      "Bash(cp Paragon_Interface.lua \"D:/Games/wow-wotlk-classless/Interface/FrameXML/Paragon/Paragon_Interface.lua\")",
+      "Bash(D=\"D:/Games/wow-wotlk-classless/Interface/FrameXML\" *)",
+      "Read(//d/Games/wow-wotlk-classless/Interface/FrameXML/**)",
+      "Bash(D:/Servers/mysql-8.4.4-winx64/bin/mysql.exe -h127.0.0.1 -P3306 -uacore -pacore -N -e 'SHOW DATABASES;')",
+      "Bash(D:/Servers/mysql-8.4.4-winx64/bin/mysql.exe -h127.0.0.1 -P3306 -uacore -pacore -N -e 'USE acore_ale; SHOW TABLES;')",
+      "Bash(D:/Servers/mysql-8.4.4-winx64/bin/mysql.exe -h127.0.0.1 -P3306 -uacore -pacore -e 'SELECT * FROM acore_ale.character_paragon;')",
+      "Read(//d/Games/wow-wotlk-classless/Interface/**)",
+      "Read(//d/Games/wow-wotlk-classless/Interface/AddOns/**)",
+      "Bash(S=\"d:/Servers/wow/azerothcore-wotlk-bots/modules/Paragon-Anniversary/clientside/Interface/FrameXML\" *)",
+      "Bash(grep -o '<Button name=\"[A-Za-z$]*\"' MainMenuBarMicroButtons-old.xml)",
+      "Bash(sed 's/.*name=\"//;s/\"//')",
+      "Bash(grep -o '<Button name=\"[A-Za-z$]*\"' MainMenuBarMicroButtons.xml)",
+      "Bash(sed 's/^< //')",
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(awk 'NR>=100 && NR<=132' MainMenuBarMicroButtons-old.xml)",
+      "Bash(cd \"d:/Servers/wow/azerothcore-wotlk-bots/modules/Paragon-Anniversary/clientside/Interface/FrameXML\" && cp MainMenuBarMicroButtons.xml MainMenuBarMicroButtons-new.xml && echo \"base copied\")",
+      "Bash(grep -o '<Button name=\"[A-Za-z$]*\"' MainMenuBarMicroButtons-new.xml)"
+    ],
+    "additionalDirectories": [
+      "d:\\Servers\\wow\\azerothcore-wotlk-bots\\modules\\Paragon-Anniversary\\clientside\\Interface\\FrameXML"
+    ]
+  }
+}

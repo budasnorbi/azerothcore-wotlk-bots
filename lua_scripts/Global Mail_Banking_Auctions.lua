@@ -12,19 +12,26 @@ local commands = {
     auction = { "auctions", "ah", "auctionhouse" },  -- Chat variations for opening the auction house
 }
 
-local function HandleChatCommand(event, player, message, type, language)
-    -- Convert message to lowercase for case-insensitive comparison
-    local normalizedMessage = string.lower(message)
+-- PLAYER_EVENT_ON_COMMAND (42) passes (event, player, command, chatHandler).
+-- The leading "." or "!" has already been stripped by ChatHandler::ParseCommands.
+local function HandleChatCommand(event, player, command, chatHandler)
+    -- player is nil when the command comes from the server console
+    if not player then
+        return
+    end
+
+    -- Convert command to lowercase for case-insensitive comparison
+    local normalizedCommand = string.lower(command)
 
     for action, commandList in pairs(commands) do
-        for _, command in ipairs(commandList) do
-            if normalizedMessage == command then
+        for _, cmd in ipairs(commandList) do
+            if normalizedCommand == cmd then
                 if action == "bank" then
                     player:SendShowBank(player)
                 elseif action == "mail" then
                     player:SendShowMailBox()
                 elseif action == "auction" then
-                    player:SendShowBank(player)
+                    player:SendAuctionMenu(player)
                 end
                 -- Return false to prevent further processing
                 return false

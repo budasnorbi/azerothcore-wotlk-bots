@@ -31,8 +31,7 @@ REPLACE INTO `playercreateinfo_item` (`race`, `class`, `itemid`, `amount`, `Note
 	(0, 6, 40582, -1, '[TDB PH] - unsused Scourgestone'),
 	(0, 11, 3661, 1, NULL),
 	(0, 11, 6123, 1, NULL),
-	(0, 11, 6124, 1, NULL),
-	(0, 11, 6948, 1, NULL);
+	(0, 11, 6124, 1, NULL);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
